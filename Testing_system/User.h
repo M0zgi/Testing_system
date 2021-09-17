@@ -1,23 +1,29 @@
-#pragma once
+п»ї#pragma once
 #include <iostream>
 #include <string>
 #include <fstream>
 #include <exception>
 #include"MyExceptions.h"
 #include"Menu.h"
+//#include"Function.h"
 
 using namespace std;
+
+void gotoxy(int, int);
 
 class User
 {
 public:
-	User() { login = "Зарегистрируйтесь, или войдите"; }
-	User(string login) : login(login) {}
-	//~User();
+	User() { login = "Р—Р°СЂРµРіРёСЃС‚СЂРёСЂСѓР№С‚РµСЃСЊ, РёР»Рё РІРѕР№РґРёС‚Рµ"; }
+	User(string login, string pass) : login(login), pass(pass) {}
+	
+	//virtual void Registration() = 0;
+	
+	~User() {};
 
 protected:
 	string login;
-	string name;
+	string pass;
 
 };
 
@@ -26,9 +32,11 @@ class Admin: public User
 public:
 	Admin() {};
 
-	~Admin();
+	~Admin() {};
 
 	friend bool CheckAdmin();
+
+	void RegistrationAdmin();
 	
 private:
 	
@@ -37,35 +45,86 @@ private:
 
 string Admin::filename = "admin.txt";
 
-//inline void Admin::CheckAdmin()
-//{
-//	ifstream fin;	
-//
-//	//fin.exceptions(ifstream::badbit | istream::failbit);
-//
-//	try
-//	{
-//		fin.open(filename);
-//
-//		if (!fin.is_open())
-//		{
-//			throw ExceptionAdmin("Файл конфигурации не найден", 1);
-//		}
-//		
-//		fin.close();
-//	}	
-//
-//	catch (ExceptionAdmin& ex)
-//	{
-//	
-//		cout << ex.what() << ex.GetError() << "\n";
-//		cout << "В системе нет зарегистрированного администратора.\n";
-//		cout << "Пройдите регистрацию";
-//		system("pause");
-//	}
-//		
-//}
-
-Admin::~Admin()
+class Student : public User
 {
+public:
+	Student() {};
+	~Student() {};
+
+	void Registration();
+
+private:
+	string filename;
+	static string folder; //РёРјСЏ РїР°РїРєРё РґР»СЏ СЃРѕС…СЂР°РЅРµРЅРёСЏ СЂРµРіРёСЃС‚СЂР°С†РёРѕРЅРЅС‹С… РґР°РЅРЅС‹С… СЃС‚СѓРґРµРЅС‚РѕРІ
+};
+
+string Student::folder = "StudentLogin";
+
+inline void Admin::RegistrationAdmin()
+{
+	
+	cout << "Р РµРіРёСЃС‚СЂР°С†РёСЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР° СЃРёСЃС‚РµРјС‹ С‚РµСЃС‚РёСЂРѕРІР°РЅРёСЏ\n";	
+
+	ofstream fout;
+
+	fout.exceptions(ofstream::badbit | ofstream::failbit);
+
+	try
+	{
+		string path = Admin::filename;
+
+		fout.open(path);
+
+		cout << "Р’РІРµРґРёС‚Рµ Р»РѕРіРёРЅ (e-mail): ";
+		string login;
+		cin >> login;
+		fout << login <<"\n";
+		
+		cout << "Р’РІРµРґРёС‚Рµ РїР°СЂРѕР»СЊ: ";
+		string pass;
+		cin >> pass;
+		fout << pass;
+
+		fout.close();		
+	}
+
+	catch (const ifstream::failure& ex)
+	{
+		cout << ex.what() << "РљРѕРґ РѕС€РёР±РєРё: " << ex.code()<< "\n";
+		system("pause");
+	}
+}
+
+void Student::Registration()
+{
+	cout << "Р РµРіРёСЃС‚СЂР°С†РёСЏ СЃС‚СѓРґРµРЅС‚Р°\n";
+
+	gotoxy(25, 11);
+	cout << "Р’РІРµРґРёС‚Рµ Р»РѕРіРёРЅ (e-mail): ";
+
+	cin >> this->login;
+
+	ofstream fout;
+
+	fout.exceptions(ofstream::badbit | ofstream::failbit);
+
+	try
+	{
+		fout.open(this->folder + "/" + this->login + ".txt");
+		fout << this->login << "\n";
+		gotoxy(25, 12);
+		cout << "Р’РІРµРґРёС‚Рµ РїР°СЂРѕР»СЊ: ";
+		string pass;
+		cin >> pass;
+		fout << pass;
+
+		fout.close();
+	}
+
+	catch (const ifstream::failure& ex)
+	{
+		gotoxy(25, 13);
+		cout << ex.what() << "\nРљРѕРґ РѕС€РёР±РєРё: " << ex.code() << "\n";
+		system("pause");
+	}
 }

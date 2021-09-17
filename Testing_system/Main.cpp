@@ -1,4 +1,4 @@
-#include <iostream>
+Ôªø#include <iostream>
 #include <string>
 #include <windows.h> 
 #include <conio.h>
@@ -25,9 +25,13 @@ int main()
 	
 	bool check = CheckAdmin();
 
-	if (check)
-	{
-		unique_ptr<Menu> menu;
+	if (!check)
+	{		
+		unique_ptr<Admin> ad(new Admin);
+		 
+		ad->RegistrationAdmin();
+		
+		/*unique_ptr<Menu> menu;
 		Factory* main_menu;
 
 		AminFactory ma;
@@ -36,12 +40,39 @@ int main()
 
 		menu = main_menu->runMenu();
 
-		menu->printMenu();
+		menu->printMenu();*/
+		
+		
+		////–ú–µ–Ω—é –ê–¥–º–∏–Ω–∞
+		//unique_ptr<Menu> menu;
+		//
+		//shared_ptr<Factory> main_menu;
+
+		//shared_ptr<AdminFactory> ma (new AdminFactory);
+
+		//main_menu = ma;
+
+		//menu = main_menu->runMenu();
+
+		//menu->printMenu();
 	}
 
 	else
-	{		
-		cout << "–Â„‡ÚÒˇ";	
+	{				
+		
+
+
+		unique_ptr<Menu> menu;
+		
+		shared_ptr<Factory> main_menu;
+
+		shared_ptr<SignFactory> ma (new SignFactory);
+
+		main_menu = ma;
+
+		menu = main_menu->runMenu();
+
+		menu->printMenu();
 	}
 	
 	return 0;

@@ -1,13 +1,13 @@
-#pragma once
+п»ї#pragma once
 
 
 void UseMenu(string name, int ItemCount);
 
 
-//Меню реализуется используя паттерн Фабричный метод (Factory method)	
-//Определяет интерфейс для создания объекта, но оставляет подклассам решение о том, какой класс инстанцировать.
+//Р—Р°РїСѓСЃРє РЅСѓР¶РЅС‹С… СЌР»РµРјРµРЅС‚РѕРІ РњРµРЅСЋ СЂРµР°Р»РёР·СѓРµС‚СЃСЏ РёСЃРїРѕР»СЊР·СѓСЏ РїР°С‚С‚РµСЂРЅ Р¤Р°Р±СЂРёС‡РЅС‹Р№ РјРµС‚РѕРґ (Factory method)	
+//РћРїСЂРµРґРµР»СЏРµС‚ РёРЅС‚РµСЂС„РµР№СЃ РґР»СЏ СЃРѕР·РґР°РЅРёСЏ РѕР±СЉРµРєС‚Р°, РЅРѕ РѕСЃС‚Р°РІР»СЏРµС‚ РїРѕРґРєР»Р°СЃСЃР°Рј СЂРµС€РµРЅРёРµ Рѕ С‚РѕРј, РєР°РєРѕР№ РєР»Р°СЃСЃ РёРЅСЃС‚Р°РЅС†РёСЂРѕРІР°С‚СЊ.
 
-// UseMenu(string name, int ItemCount) - в эту функцию передается количество элементов меню и кто ее вызвал, user или admin
+// UseMenu(string name, int ItemCount) - РІ СЌС‚Сѓ С„СѓРЅРєС†РёСЋ РїРµСЂРµРґР°РµС‚СЃСЏ РєРѕР»РёС‡РµСЃС‚РІРѕ СЌР»РµРјРµРЅС‚РѕРІ РјРµРЅСЋ Рё РєС‚Рѕ РµРµ РІС‹Р·РІР°Р», user РёР»Рё admin
 
 class Menu
 {
@@ -31,6 +31,12 @@ class MenuUser : public Menu
 
 };
 
+class MenuSign : public Menu
+{
+public:
+	void printMenu() override;
+};
+
 class Factory
 {
 public:
@@ -41,7 +47,7 @@ private:
 
 };
 
-class AminFactory : public Factory
+class AdminFactory : public Factory
 {
 public:
 
@@ -54,10 +60,28 @@ private:
 
 };
 
+class SignFactory : public Factory
+{
+public:
+
+	unique_ptr<Menu>runMenu() override
+	{
+		return make_unique<MenuSign>();
+	}
+
+private:
+
+};
+
 void MenuAdmin::printMenu()
 {	
-	int ItemCount = 4; // Эта переменная содержит количество пунктов меню.	
+	int ItemCount = 4; // Р­С‚Р° РїРµСЂРµРјРµРЅРЅР°СЏ СЃРѕРґРµСЂР¶РёС‚ РєРѕР»РёС‡РµСЃС‚РІРѕ РїСѓРЅРєС‚РѕРІ РјРµРЅСЋ.	
 	UseMenu("admin", ItemCount);
 }
 
 
+void MenuSign::printMenu()
+{
+	int ItemCount = 3; // Р­С‚Р° РїРµСЂРµРјРµРЅРЅР°СЏ СЃРѕРґРµСЂР¶РёС‚ РєРѕР»РёС‡РµСЃС‚РІРѕ РїСѓРЅРєС‚РѕРІ РјРµРЅСЋ.	
+	UseMenu("sign", ItemCount);
+}
