@@ -7,8 +7,11 @@ using namespace std;
 class Encryption
 {
 public:
+	//Encryption() {};
 	Encryption(string mycode) : mycode(mycode) {}
 	~Encryption() {};
+
+	void SetMycode(string mycode) { this->mycode = mycode; }
 
 	virtual void Hash(string &s) = 0;
 

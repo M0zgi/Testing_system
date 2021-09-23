@@ -70,6 +70,9 @@ void UseMenu(string user, int ItemCount)
 {
 	ChangeCursorStatus(false);
 	
+	//unique_ptr<User> us(new User);
+	//user = us->GetLogin();
+
 	int MenuChoice = 1; // Эта переменная содержит позицию курсора. 
 	char key; // для ввода ключа (стрелка вверх, стрелка вниз и т. д.);
 
@@ -163,7 +166,7 @@ string* MenuItems(string user)
 	if (user == "admin")
 	{
 		string* item = new string[4];
-		item[0] = "Menu Option #1.";
+		item[0] = "Админ #1.";
 		item[1] = "Menu Option #2.";
 		item[2] = "Menu Option #3.";
 		item[3] = "Exit.";
@@ -235,7 +238,12 @@ void MenuFun20()
 	system("cls"); 
 	gotoxy(25, 10);
 	
+	//Вход через почту
 	
+	gotoxy(25, 11);
+	unique_ptr<User> user(new User);
+
+	user->UserSignIn();
 
 	_getch(); 
 	system("cls");

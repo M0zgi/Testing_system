@@ -27,6 +27,10 @@ public:
 	User(string login, string pass) : login(login), pass(pass) {}
 	
 	//virtual void Registration() = 0;
+
+	string GetLogin() { return this->login; }
+
+	void UserSignIn();
 	
 	~User() {};
 
@@ -71,6 +75,90 @@ private:
 
 string Student::folder = "StudentLogin";
 
+void User::UserSignIn()
+{
+	cout << "Вход в систему\n";
+
+	gotoxy(25, 11);
+	cout << "Введите логин (e-mail): ";
+	cin >> this->login ;
+
+	unique_ptr<Admin> ad(new Admin);
+
+	string path = ad->GetFilename();
+
+	if (this->login + ".txt" == path)
+	{
+		system("cls");
+		gotoxy(25, 11);
+		cout << "Введите логин (e-mail) администратора системы: ";
+		string adminlogin;
+		cin >> this->login;
+
+		cout << "Введите пароль администратора системы: ";
+		string adminpass;
+		cin >> this->pass;
+
+		ifstream afin;
+
+		afin.exceptions(ifstream::badbit | ifstream::failbit);
+
+		try
+		{
+			afin.open(path);
+			//afin >> adminlogin;
+			int count = 0;
+			while (!afin.eof())
+			{				
+				if (count)
+				getline(afin, adminpass);
+				else
+				getline(afin, adminlogin);
+				count++;
+			}	
+
+			afin.close();
+		}
+		catch (const ifstream::failure& ex)
+		{
+			gotoxy(25, 13);
+			cout << ex.what() << "\nКод ошибки: " << ex.code() << "\n";
+			system("pause");
+		}
+
+		//Процесс расшифровывания логина администратора системы
+		
+		unique_ptr<Decrypt> en1(new Decrypt(adminlogin));
+		en1->Hash(adminlogin);
+		en1->SetMycode(adminpass);
+		en1->Hash(adminpass);
+
+		if (this->login == adminlogin && this->pass == adminpass)
+
+		{
+			unique_ptr<Menu> menu;
+
+			shared_ptr<Factory> main_menu;
+
+			shared_ptr<AdminFactory> ma(new AdminFactory);
+
+			main_menu = ma;
+
+			menu = main_menu->runMenu();
+
+			menu->printMenu();
+		}
+
+		else
+		{
+			cout << "Ошибка входа";
+			//this->login = "sign";
+		}	
+
+	}
+	
+}
+
 inline void Admin::RegistrationAdmin()
 {
 	
@@ -92,10 +180,9 @@ inline void Admin::RegistrationAdmin()
 		cin >> login;
 
 		//Процесс шифрования
-		shared_ptr<Encryption> en;
-		shared_ptr<Encrypt> cryptlogin(new Encrypt(login));
-		en = cryptlogin;
-		en->Hash(login);
+		
+		unique_ptr<Encrypt> cryptlogin(new Encrypt(login));
+		cryptlogin->Hash(login);
 
 		fout << login <<"\n";
 
@@ -104,9 +191,8 @@ inline void Admin::RegistrationAdmin()
 		cin >> pass;
 
 		//Процесс шифрования
-		shared_ptr<Encrypt> cryptpass(new Encrypt(pass));
-		en = cryptpass;
-		en->Hash(pass);
+		unique_ptr<Encrypt> cryptpass(new Encrypt(pass));
+		cryptpass->Hash(pass);
 
 		fout << pass;
 
@@ -147,10 +233,9 @@ void Student::Registration()
 		afin >> adminlogin;	
 
 		//Процесс расшифровывания логина администратора системы
-		shared_ptr<Encryption> en;
-		shared_ptr<Decrypt> en1(new Decrypt(adminlogin));
-		en = en1;
-		en->Hash(adminlogin);
+		
+		unique_ptr<Decrypt> en1(new Decrypt(adminlogin));		
+		en1->Hash(adminlogin);
 		afin.close();
 
 		//проверяем есть ли пользователь с таким логином
@@ -171,10 +256,9 @@ void Student::Registration()
 				cin >> pass;				
 
 				//Процесс шифрования
-				shared_ptr<Encryption> en;
-				shared_ptr<Encrypt> crypt(new Encrypt (pass));
-				en = crypt;
-				en->Hash(pass);
+				
+				unique_ptr<Encrypt> crypt(new Encrypt (pass));
+				crypt->Hash(pass);
 
 				//сохранение зашифрованного пароля
 				fout << pass;

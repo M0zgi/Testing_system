@@ -30,7 +30,7 @@ int main()
 		unique_ptr<Admin> ad(new Admin);
 		 
 		ad->RegistrationAdmin();
-		
+		system("cls");
 		/*unique_ptr<Menu> menu;
 		Factory* main_menu;
 
@@ -57,11 +57,7 @@ int main()
 		//menu->printMenu();
 	}
 
-	else
-	{				
-		
-
-
+	
 		unique_ptr<Menu> menu;
 		
 		shared_ptr<Factory> main_menu;
@@ -73,7 +69,7 @@ int main()
 		menu = main_menu->runMenu();
 
 		menu->printMenu();
-	}
+	
 	
 	return 0;
 }
