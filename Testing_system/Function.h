@@ -158,7 +158,7 @@ void UseMenu(string user, int ItemCount)
 }
 
 //-----------------------------------------------------------------------------------------------
-string* MenuItems(string user) // this function returns a pointer to a string.
+string* MenuItems(string user) 
 {
 	if (user == "admin")
 	{
@@ -193,7 +193,7 @@ string* MenuItems(string user) // this function returns a pointer to a string.
 	
 }
 //-----------------------------------------------------------------------------------------------
-void gotoxy(int xpos, int ypos)  // just take this function as it is.
+void gotoxy(int xpos, int ypos)  
 {
 	COORD scrn;
 	HANDLE hOuput = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -203,10 +203,10 @@ void gotoxy(int xpos, int ypos)  // just take this function as it is.
 //-----------------------------------------------------------------------------------------------
 void MenuFun1()
 {
-	system("cls"); //clear the screen.
+	system("cls"); 
 	gotoxy(25, 10);
 	cout << "You have selected menu option (#1)" << endl;
-	_getch(); // we can use getch like pause (whitout assigning the return value to a variable).
+	_getch();
 	system("cls");
 }
 //-----------------------------------------------------------------------------------------------
@@ -232,12 +232,12 @@ void MenuFun3()
 //-----------------------------------------------------------------------------------------------
 void MenuFun20()
 {
-	system("cls"); //clear the screen.
+	system("cls"); 
 	gotoxy(25, 10);
 	
 	
 
-	_getch(); // we can use getch like pause (whitout assigning the return value to a variable).
+	_getch(); 
 	system("cls");
 }
 //-----------------------------------------------------------------------------------------------
@@ -248,8 +248,7 @@ void MenuFun21()
 	unique_ptr<Student> st(new Student);
 
 	st->Registration();
-	gotoxy(25, 12);
-	cout << "Регистрация завершена. Нажмите любую кнопку." << endl;
+	
 	_getch();
 	system("cls");
 }
@@ -271,12 +270,12 @@ void ChangeCursorStatus(bool Visible)
 	if (Visible)
 	{
 		c->bVisible = TRUE;
-		c->dwSize = 0;//(0) is invild so the default value is set
+		c->dwSize = 0;
 	}
 	else
 	{
 		c->bVisible = FALSE;
-		c->dwSize = 1;//it must be assigned to a valid value
+		c->dwSize = 1;
 	}
 
 	SetConsoleCursorInfo(h, c);
