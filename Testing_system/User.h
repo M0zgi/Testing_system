@@ -86,13 +86,12 @@ inline void Admin::RegistrationAdmin()
 
 		fout.open(path);
 
-		//Процесс шифрования
 		
-
 		cout << "Введите логин (e-mail): ";
 		string login;
 		cin >> login;
 
+		//Процесс шифрования
 		shared_ptr<Encryption> en;
 		shared_ptr<Encrypt> cryptlogin(new Encrypt(login));
 		en = cryptlogin;
@@ -104,9 +103,11 @@ inline void Admin::RegistrationAdmin()
 		string pass;
 		cin >> pass;
 
+		//Процесс шифрования
 		shared_ptr<Encrypt> cryptpass(new Encrypt(pass));
 		en = cryptpass;
 		en->Hash(pass);
+
 		fout << pass;
 
 		fout.close();		
@@ -145,11 +146,15 @@ void Student::Registration()
 		afin.open(path);
 		afin >> adminlogin;	
 
+		//Процесс расшифровывания логина администратора системы
 		shared_ptr<Encryption> en;
 		shared_ptr<Decrypt> en1(new Decrypt(adminlogin));
 		en = en1;
 		en->Hash(adminlogin);
 		afin.close();
+
+		//проверяем есть ли пользователь с таким логином
+		//вторая проверка на уникальность логина администратора системы
 
 		if (ckfile && this->login != adminlogin)
 		{
