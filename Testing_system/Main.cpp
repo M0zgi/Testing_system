@@ -1,4 +1,6 @@
-﻿#include <iostream>
+﻿#define _CRT_SECURE_NO_WARNINGS
+
+#include <iostream>
 #include <string>
 #include <windows.h> 
 #include <conio.h>
@@ -7,6 +9,7 @@
 #include"MyExceptions.h"
 #include"User.h"
 #include"Function.h"
+#include"md5.h"
 
 using namespace std;
 
@@ -70,6 +73,8 @@ int main()
 
 		menu->printMenu();
 	
+	//string grape = "grape";
+	//cout << "md5 of 'grape': " << md5(grape) << endl;
 	
 	return 0;
 }

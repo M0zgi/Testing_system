@@ -10,7 +10,7 @@
 #include"MyExceptions.h"
 #include"Menu.h"
 #include"Encryption.h"
-
+#include"md5.h"
 //#include"Function.h"
 
 
@@ -92,12 +92,15 @@ void User::UserSignIn()
 		system("cls");
 		gotoxy(25, 11);
 		cout << "Введите логин (e-mail) администратора системы: ";
-		string adminlogin;
+		string adminlogin, md5adminlogin;
 		cin >> this->login;
 
 		cout << "Введите пароль администратора системы: ";
-		string adminpass;
+		string adminpass, md5adminpass;
 		cin >> this->pass;
+
+		md5adminlogin = md5(this->login);
+		md5adminpass = md5(this->pass);
 
 		ifstream afin;
 
@@ -126,26 +129,13 @@ void User::UserSignIn()
 			system("pause");
 		}
 
-		//Процесс расшифровывания логина администратора системы
-		
-		unique_ptr<Decrypt> en1(new Decrypt(adminlogin));
-		en1->Hash(adminlogin);
-		en1->SetMycode(adminpass);
-		en1->Hash(adminpass);
-
-		if (this->login == adminlogin && this->pass == adminpass)
-
+		if (md5adminlogin == adminlogin && md5adminpass == adminpass)
 		{
 			unique_ptr<Menu> menu;
-
 			shared_ptr<Factory> main_menu;
-
 			shared_ptr<AdminFactory> ma(new AdminFactory);
-
 			main_menu = ma;
-
 			menu = main_menu->runMenu();
-
 			menu->printMenu();
 		}
 
@@ -154,14 +144,12 @@ void User::UserSignIn()
 			cout << "Ошибка входа";
 			//this->login = "sign";
 		}	
-
 	}
 	
 }
 
 inline void Admin::RegistrationAdmin()
-{
-	
+{	
 	cout << "Регистрация администратора системы тестирования\n";	
 
 	ofstream fout;
@@ -173,28 +161,20 @@ inline void Admin::RegistrationAdmin()
 		string path = Admin::filename;
 
 		fout.open(path);
-
 		
-		cout << "Введите логин (e-mail): ";
+		cout << "Введите логин администратора: ";
 		string login;
 		cin >> login;
+		string md5login;
+		md5login = md5(login);
+		fout << md5login << "\n";
 
-		//Процесс шифрования
-		
-		unique_ptr<Encrypt> cryptlogin(new Encrypt(login));
-		cryptlogin->Hash(login);
-
-		fout << login <<"\n";
-
-		cout << "Введите пароль: ";
+		cout << "Введите пароль администратора: ";
 		string pass;
 		cin >> pass;
-
-		//Процесс шифрования
-		unique_ptr<Encrypt> cryptpass(new Encrypt(pass));
-		cryptpass->Hash(pass);
-
-		fout << pass;
+		string md5pass;
+		md5pass = md5(pass);
+		fout << md5pass;
 
 		fout.close();		
 	}
@@ -203,6 +183,11 @@ inline void Admin::RegistrationAdmin()
 	{
 		cout << ex.what() << "Код ошибки: " << ex.code()<< "\n";
 		system("pause");
+	}
+
+	catch (...)
+	{
+		cout << "Catch Admin::RegistrationAdmin()\n";
 	}
 }
 
@@ -214,7 +199,7 @@ void Student::Registration()
 	cout << "Введите логин (e-mail): ";
 	cin >> this->login;
 
-	string path = this->folder + "/" + this->login + ".txt";
+	string path = this->folder + "/" + md5(this->login) + ".txt";
 	ifstream fin(path);
 
 	//проверяем есть ли пользователь, если нет продолжаем регистрацию
@@ -223,101 +208,64 @@ void Student::Registration()
 	//проверяем что бы введенный логин не совпадал с логином админа
 	unique_ptr<Admin> admin(new Admin);
 	path = admin->GetFilename();
-	string adminlogin;
-	ifstream afin;
-	afin.exceptions(ofstream::badbit | ofstream::failbit);
 
 	try
-	{
-		afin.open(path);
-		afin >> adminlogin;	
+	{		
+		//проверка на логин администратора системы
 
-		//Процесс расшифровывания логина администратора системы
-		
-		unique_ptr<Decrypt> en1(new Decrypt(adminlogin));		
-		en1->Hash(adminlogin);
-		afin.close();
+		if (this->login + ".txt" == path)
+		{
+			throw ExceptionUser("Регистрация с веденным логином запрещена", 2);
+		}
 
 		//проверяем есть ли пользователь с таким логином
-		//вторая проверка на уникальность логина администратора системы
-
-		if (ckfile && this->login != adminlogin)
+		if (ckfile)
 		{
 			ofstream fout;
-			fout.exceptions(ofstream::badbit | ofstream::failbit);
+			fout.exceptions(ofstream::badbit | ofstream::failbit);			
+			fout.open(this->folder + "/" + md5(this->login) + ".txt");
 
-			try
-			{
-				fout.open(this->folder + "/" + this->login + ".txt");
-				fout << this->login << "\n";
-				gotoxy(25, 12);
-				cout << "Введите пароль: ";
-				string pass;
-				cin >> pass;				
+			string hash = md5(this->login);
+			fout << hash << "\n";
 
-				//Процесс шифрования
-				
-				unique_ptr<Encrypt> crypt(new Encrypt (pass));
-				crypt->Hash(pass);
+			gotoxy(25, 12);
+			cout << "Введите пароль: ";
+			string pass;
+			cin >> pass;				
 
-				//сохранение зашифрованного пароля
-				fout << pass;
+			//сохранение зашифрованного пароля
+			hash = md5(pass);
+			fout << hash;
 
-				gotoxy(25, 13);
-				cout << "Регистрация завершена. Нажмите любую кнопку." << endl;
-				fout.close();
-
-				/*afin.open(this->folder + "/" + this->login + ".txt");
-				
-				string add;
-
-				while (!afin.eof())
-				{
-					int i = -1;
-
-					do
-					{
-						getline(afin, add);
-
-						i++;
-
-						if (i)
-						{
-							shared_ptr<Decrypt> en1(new Decrypt(add));
-							en = en1;
-
-							en->Hash(add);
-
-							cout << add << "\n";
-						}						
-
-					} while (!i);					
-				}				
-				
-				afin.close();*/
-
-			}
-
-			catch (const ofstream::failure& ex)
-			{
-				gotoxy(25, 13);
-				cout << ex.what() << "\nКод ошибки: " << ex.code() << "\n";
-				system("pause");
-			}
+			gotoxy(25, 13);
+			cout << "Регистрация завершена. Нажмите любую кнопку." << endl;
+			fout.close();			
 		}
 
 		else
 		{
-			cout << "Пользователь с таким логином существует.\n";
-			cout << "Войдите в систему используя указанный логин: " << this->login << "\n";
-			cout << "Или пройдите регистрацию используя другой e-mail";
+			throw ExceptionUser("Пользователь с таким логином существует. \nВойдите в систему используя указанный логин. \nИли пройдите регистрацию используя другой e-mail" , 3);
 		}
-
 	}
-	catch (const ifstream::failure& ex)
+
+	catch (const ofstream::failure& ex)
 	{
 		gotoxy(25, 13);
 		cout << ex.what() << "\nКод ошибки: " << ex.code() << "\n";
+		system("pause");
+	}
+
+	catch (ExceptionUser& ex)
+	{
+		gotoxy(25, 13);
+		cout << ex.what() << "\nКод ошибки: " << ex.GetError() << "\n";
+		system("pause");
+	}
+
+	catch (...)
+	{	
+		gotoxy(25, 13);
+		cout << "Ошибка в Student::Registration()";
 		system("pause");
 	}
 }
