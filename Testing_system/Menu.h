@@ -26,9 +26,9 @@ public:
 	void printMenu() override;
 };
 
-class MenuUser : public Menu
+class MenuStudent : public Menu
 {
-
+	void printMenu() override;
 };
 
 class MenuSign : public Menu
@@ -73,9 +73,24 @@ private:
 
 };
 
+class StudentFactory : public Factory
+{
+public:
+
+	unique_ptr<Menu>runMenu() override
+	{
+		return make_unique<MenuStudent>();
+	}
+
+private:
+
+};
+
 void MenuAdmin::printMenu()
 {	
-	int ItemCount = 4; // Эта переменная содержит количество пунктов меню.	
+	
+	system("cls");
+	int ItemCount = 5; // Эта переменная содержит количество пунктов меню.	
 	UseMenu("admin", ItemCount);
 }
 
@@ -84,4 +99,11 @@ void MenuSign::printMenu()
 {
 	int ItemCount = 3; // Эта переменная содержит количество пунктов меню.	
 	UseMenu("sign", ItemCount);
+}
+
+void MenuStudent::printMenu()
+{
+	system("cls");
+	int ItemCount = 4; // Эта переменная содержит количество пунктов меню.	
+	UseMenu("student", ItemCount);
 }

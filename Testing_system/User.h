@@ -5,40 +5,38 @@
 #include <exception>
 //#include <filesystem>
 
-
-
 #include"MyExceptions.h"
 #include"Menu.h"
 #include"Encryption.h"
 #include"md5.h"
 //#include"Function.h"
 
-
 using namespace std;
-
-
 
 void gotoxy(int, int);
 
 class User
 {
 public:
+	
 	User() { login = "Зарегистрируйтесь, или войдите"; }
 	User(string login, string pass) : login(login), pass(pass) {}
 	
-	//virtual void Registration() = 0;
-
+	virtual void Registration() = 0;
+	
 	string GetLogin() { return this->login; }
-
-	void UserSignIn();
+	string UserSignIn();
 	
 	~User() {};
 
 protected:
+
 	string login;
 	string pass;
-
+	static string folder; //имя папки для сохранения регистрационных данных студентов
 };
+
+string User::folder = "StudentLogin";
 
 class Admin: public User
 {
@@ -51,10 +49,9 @@ public:
 
 	friend bool CheckAdmin();
 
-	void RegistrationAdmin();
+	void Registration() override;
 	
-private:
-	
+private:	
 	static string filename;
 };
 
@@ -66,16 +63,13 @@ public:
 	Student() {};
 	~Student() {};
 
-	void Registration();
+	void Registration() override;
 
 private:
-	string filename;
-	static string folder; //имя папки для сохранения регистрационных данных студентов
+	string filename;	
 };
 
-string Student::folder = "StudentLogin";
-
-void User::UserSignIn()
+string User::UserSignIn()
 {
 	cout << "Вход в систему\n";
 
@@ -131,24 +125,103 @@ void User::UserSignIn()
 
 		if (md5adminlogin == adminlogin && md5adminpass == adminpass)
 		{
-			unique_ptr<Menu> menu;
-			shared_ptr<Factory> main_menu;
-			shared_ptr<AdminFactory> ma(new AdminFactory);
-			main_menu = ma;
-			menu = main_menu->runMenu();
-			menu->printMenu();
+			return "admin";
 		}
 
 		else
 		{
 			cout << "Ошибка входа";
-			//this->login = "sign";
+			return this->login = "Зарегистрируйтесь, или войдите";
 		}	
+	}
+
+	else 
+	{		
+		path = this->folder + "/" + md5(this->login) + ".txt";		
+
+		try
+		{
+			ifstream ufin(path);
+			ufin.exceptions(ifstream::badbit | ifstream::failbit);			
+		}
+		catch (...)
+		{			
+			cout << "Пользователь с таким логином не найден.\n";
+			system("pause");
+			return this->login = "Зарегистрируйтесь, или войдите";
+		}
+
+		ifstream ufin(path);
+		ufin.exceptions(ifstream::badbit | ifstream::failbit);
+
+		//проверяем есть ли пользовательский файл с веденным логином
+
+		bool ckfile = ufin.is_open();
+
+		//bool ckfile = ufin.open(path);
+
+		try
+		{
+			//проверяем есть ли пользователь с таким логином
+			if (ckfile)
+			{				
+				gotoxy(25, 13); 
+				cout << "Введите пароль: ";
+				string userpass, md5userpass;
+				cin >> this->pass;
+
+				md5userpass = md5(this->pass);
+
+				int count = -2;
+				while (count)
+				{					
+					getline(ufin, userpass);					
+					count++;
+				}
+
+				if (md5userpass == userpass)
+				{
+					gotoxy(25, 14);
+					cout << "Вы успешно вошли в систему тестирования. Нажмите любую кнопку." << endl;
+					ufin.close();
+					return this->login;
+				}
+
+				else
+				{
+					throw ExceptionUser("Вы ввели неверный пароль пользователя", 4);
+				}				
+			}
+		}
+
+		catch (const ofstream::failure& ex)
+		{
+			gotoxy(25, 13);
+			cout << ex.what() << "\nКод ошибки: " << ex.code() << "\n";
+			system("pause");
+		}
+
+		catch (ExceptionUser& ex)
+		{
+			gotoxy(25, 13);
+			cout << ex.what() << "\nКод ошибки: " << ex.GetError() << "\n";
+			system("pause");
+		}
+
+		catch (...)
+		{
+			gotoxy(25, 13);
+			cout << "Ошибка в string User::UserSignIn()";
+			system("pause");
+		}
+		
+		ufin.close();
+		return "Зарегистрируйтесь, или войдите";
 	}
 	
 }
 
-inline void Admin::RegistrationAdmin()
+inline void Admin::Registration()
 {	
 	cout << "Регистрация администратора системы тестирования\n";	
 
@@ -193,6 +266,8 @@ inline void Admin::RegistrationAdmin()
 
 void Student::Registration()
 {
+	
+	system("cls");
 	cout << "Регистрация студента\n";
 
 	gotoxy(25, 11);
@@ -204,7 +279,7 @@ void Student::Registration()
 
 	//проверяем есть ли пользователь, если нет продолжаем регистрацию
 	bool ckfile = fin.fail();
-	
+	fin.close();
 	//проверяем что бы введенный логин не совпадал с логином админа
 	unique_ptr<Admin> admin(new Admin);
 	path = admin->GetFilename();
@@ -267,5 +342,5 @@ void Student::Registration()
 		gotoxy(25, 13);
 		cout << "Ошибка в Student::Registration()";
 		system("pause");
-	}
+	}	
 }

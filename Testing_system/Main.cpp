@@ -32,7 +32,7 @@ int main()
 	{		
 		unique_ptr<Admin> ad(new Admin);
 		 
-		ad->RegistrationAdmin();
+		ad->Registration();
 		system("cls");
 		/*unique_ptr<Menu> menu;
 		Factory* main_menu;
