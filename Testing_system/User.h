@@ -66,7 +66,10 @@ public:
 	void Registration() override;
 
 private:
-	string filename;	
+	string filename;
+	string name;
+	string telephone;
+	string adress;
 };
 
 string User::UserSignIn()
@@ -307,12 +310,33 @@ void Student::Registration()
 			cout << "Введите пароль: ";
 			string pass;
 			cin >> pass;				
-
+			cin.ignore();
 			//сохранение зашифрованного пароля
 			hash = md5(pass);
-			fout << hash;
+			fout << hash << "\n";
 
 			gotoxy(25, 13);
+			cout << "Введите ФИО: ";
+			string name;
+			cin >> name;			
+			fout << name << "\n";
+			cin.ignore();
+
+			gotoxy(25, 14);
+			cout << "Введите номер мобильного телефона: +38";
+			string telephone;
+			cin >> telephone;		
+			fout << telephone << "\n";
+			cin.ignore();
+
+			gotoxy(25, 15);
+			cout << "Введите домашний адрес: ";
+			string adress;
+			cin >> adress;			
+			fout << adress << "\n";
+			cin.ignore();
+
+			gotoxy(25, 16);
 			cout << "Регистрация завершена. Нажмите любую кнопку." << endl;
 			fout.close();			
 		}

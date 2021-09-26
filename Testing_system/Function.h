@@ -28,7 +28,6 @@ bool CheckAdmin()
 		}
 
 		fin.close();
-
 		return true;
 	}
 
@@ -138,7 +137,6 @@ void UseMenu(string user, int ItemCount)
 		cout << userName->GetUser();
 		MenuOption[0] = MenuFun20;
 		MenuOption[1] = MenuFun21;
-		//MenuOption[2] = MenuFun3;
 		MenuOption[2] = ExitOption;
 	}
 
