@@ -12,17 +12,12 @@ using namespace std;
 //ф-кция проверки есть ли администратор системы тестирования
 bool CheckAdmin()
 {
-	ifstream fin;
-
-	fin.exceptions(ifstream::badbit | istream::failbit);
-
 	try
 	{
 		string path = Admin::filename;
+		ifstream fin(path);
 
-		fin.open(path);
-
-		if (!fin.is_open())
+		if (fin.fail())
 		{
 			throw ExceptionAdmin("Файл конфигурации не найден. ", 1);
 		}
@@ -31,12 +26,12 @@ bool CheckAdmin()
 		return true;
 	}
 
-	catch (const ifstream::failure& ex)
-	{
-		gotoxy(25, 13);
-		cout << ex.what() << "\nКод ошибки: " << ex.code() << "\n";
-		system("pause");
-	}
+	//catch (const ifstream::failure& ex)
+	//{
+	//	gotoxy(25, 13);
+	//	cout << ex.what() << "\nКод ошибки: " << ex.code() << "\n";
+	//	system("pause");
+	//}
 
 	catch (ExceptionAdmin& ex)
 	{
@@ -86,19 +81,53 @@ class UserName
 public:
 	
 	UserName() {};
-	UserName(string user, int ItemCount) : user(user), ItemCount(ItemCount) {}
+	UserName(string user, string fio, int ItemCount) : user(user), fio(fio), ItemCount(ItemCount) {}
 	~UserName() {};
 
 	void SetUser(string user) { this->user = user; }
 	void SetItemCount(int ItemCount) { this->ItemCount = ItemCount; }
+	void SetFIO(string fio) { this->fio = fio; }
 
-	string  GetUser() { return this->user; }
-	//void SetItemCount(int ItemCount) { this->ItemCount = ItemCount; }
-	//friend class User;
+	string GetUser() { return this->user; }
+	string GetFIO() 
+	{
+		unique_ptr<Student> student(new Student);
+
+		string path = student->GetUserFolder() + "/" + md5(user) + ".txt";
+		
+		ifstream sfin;
+		sfin.exceptions(ifstream::badbit | ifstream::failbit);
+
+		if (user != "Зарегистрируйтесь, или войдите" && user != "admin")
+		{
+			try
+			{
+				sfin.open(path);
+				int count = -3;
+				while (count)
+				{					
+					getline(sfin, fio);					
+					count++;
+				}
+
+				sfin.close();
+
+			}
+			catch (const ofstream::failure& ex)
+			{
+				gotoxy(25, 13);
+				cout << ex.what() << "\nКод ошибки: " << ex.code() << "\n";
+				system("pause");
+			}
+		}		
+
+		return fio;
+	};
 
 private:
 
 	string user = "Зарегистрируйтесь, или войдите";
+	string fio = "Sign in / Sign up";
 	int ItemCount = 3;
 }; 
 
@@ -108,9 +137,6 @@ unique_ptr<UserName> userName (new UserName);
 void UseMenu(string user, int ItemCount)
 {
 	ChangeCursorStatus(false);
-	//cout << fm->GetUser();
-	//unique_ptr<User> us(new User);
-	//user = us->GetLogin();
 
 	int MenuChoice = 1; // Эта переменная содержит позицию курсора. 
 	char key; // для ввода ключа (стрелка вверх, стрелка вниз и т. д.);
@@ -121,9 +147,9 @@ void UseMenu(string user, int ItemCount)
 
 	if (user == "admin")
 	{
-		userName->SetUser("admin");
+		//userName->SetUser("admin");
 		gotoxy(0, 0);
-		cout << userName->GetUser();
+		//cout << "Пользователь: " << userName->GetUser();
 		MenuOption[0] = MenuFun21; // заполнение массива функциями.
 		MenuOption[1] = AdminFun1;
 		MenuOption[2] = AdminFun2;
@@ -134,7 +160,7 @@ void UseMenu(string user, int ItemCount)
 	else if (user == "sign")
 	{
 		gotoxy(0, 0);
-		cout << userName->GetUser();
+		//cout << "Пользователь: " << userName->GetUser();
 		MenuOption[0] = MenuFun20;
 		MenuOption[1] = MenuFun21;
 		MenuOption[2] = ExitOption;
@@ -143,10 +169,10 @@ void UseMenu(string user, int ItemCount)
 	else 
 	{
 		gotoxy(0, 0);
-		cout << userName->GetUser();		
+		//cout << "Пользователь: " << userName->GetUser();
 		MenuOption[0] = StudentFun1;
 		MenuOption[1] = StudentFun2;
-		MenuOption[2] = StudentFun3;
+	    MenuOption[2] = StudentFun3;
 		MenuOption[3] = ExitOption;		
 	}
 
@@ -164,7 +190,7 @@ void UseMenu(string user, int ItemCount)
 		}
 
 		gotoxy(0, 0);
-		cout << userName->GetUser();
+		cout << "Пользователь: " << userName->GetUser() << " ("<< userName->GetFIO() << ")";
 
 		key = _getch();
 
@@ -229,8 +255,7 @@ string* MenuItems(string user)
 	{		
 		string* item = new string[3];
 		item[0] = "Вход c помощью почты";
-		item[1] = "Регистрация";
-		//item[2] = "Menu Option #3.";
+		item[1] = "Регистрация";		
 		item[2] = "Выход";
 		return item;
 	}
@@ -259,7 +284,7 @@ void AdminFun1()
 	system("cls");
 
 	gotoxy(0, 0);
-	cout << userName->GetUser();
+	cout << "Пользователь: " << userName->GetUser();
 
 	gotoxy(25, 10);
 	cout << "You have selected menu option (#1)" << endl;
@@ -272,7 +297,7 @@ void AdminFun2()
 	system("cls");
 
 	gotoxy(0, 0);
-	cout << userName->GetUser();
+	cout << "Пользователь: "<< userName->GetUser();
 
 	gotoxy(25, 10);
 	cout << "You have selected menu option (#2)" << endl;
@@ -285,7 +310,7 @@ void AdminFun3()
 	system("cls");
 
 	gotoxy(0, 0);
-	cout << userName->GetUser();
+	cout << "Пользователь: " << userName->GetUser();
 
 	gotoxy(25, 10);
 	cout << "You have selected menu option (#3)" << endl;
@@ -300,7 +325,7 @@ void MenuFun20() //вход пользователя в систему
 	system("cls");
 
 	gotoxy(0, 0);
-	cout << userName->GetUser();
+	cout << "Пользователь: " << userName->GetUser();
 	gotoxy(25, 10);
 	
 	//Вход через почту
@@ -311,10 +336,12 @@ void MenuFun20() //вход пользователя в систему
 
 	name = user->UserSignIn();
 
-	userName->SetUser(name);
+	//userName->SetUser(name);
 
-	if (userName->GetUser() == "admin")
+	if (name == "admin")
 	{
+		userName->SetUser("admin");
+		userName->SetFIO("Администратор системы");
 		unique_ptr<Menu> menu;
 		shared_ptr<Factory> main_menu;
 		shared_ptr<AdminFactory> ma(new AdminFactory);
@@ -323,13 +350,14 @@ void MenuFun20() //вход пользователя в систему
 		menu->printMenu();
 	}
 
-	else if (userName->GetUser() == "Зарегистрируйтесь, или войдите")
+	else if (name == userName->GetUser())
 	{
 		cout << "Вход в систему не удался";
 	}
 
 	else
 	{
+		userName->SetUser(name);
 		unique_ptr<Menu> menu;
 		shared_ptr<Factory> main_menu;
 		shared_ptr<StudentFactory> ma(new StudentFactory);
@@ -347,7 +375,7 @@ void MenuFun21() // регистрация пользователя
 	system("cls");
 
 	gotoxy(0, 0);
-	cout << userName->GetUser();
+	cout << "Пользователь: " << userName->GetUser();
 
 	gotoxy(25, 10);
 	unique_ptr<Student> st(new Student);
@@ -365,7 +393,7 @@ void StudentFun1() // регистрация пользователя
 	system("cls");
 
 	gotoxy(0, 0);
-	cout << userName->GetUser();
+	cout << "Пользователь: " << userName->GetUser();
 
 	gotoxy(25, 10);
 
@@ -376,12 +404,12 @@ void StudentFun1() // регистрация пользователя
 //-----------------------------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------------------------
-void StudentFun2() // регистрация пользователя
+void StudentFun2() // 
 {
 	system("cls");
 
 	gotoxy(0, 0);
-	cout << userName->GetUser();
+	cout << "Пользователь: " << userName->GetUser();
 
 	gotoxy(25, 10);
 
@@ -392,12 +420,12 @@ void StudentFun2() // регистрация пользователя
 //-----------------------------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------------------------
-void StudentFun3() // регистрация пользователя
+void StudentFun3() // 
 {
 	system("cls");
 
 	gotoxy(0, 0);
-	cout << userName->GetUser();
+	cout << "Пользователь: " << userName->GetUser();
 
 	gotoxy(25, 10);
 

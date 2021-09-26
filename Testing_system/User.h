@@ -25,6 +25,7 @@ public:
 	virtual void Registration() = 0;
 	
 	string GetLogin() { return this->login; }
+	string GetUserFolder() { return this->folder; }
 	string UserSignIn();
 	
 	~User() {};
@@ -62,6 +63,7 @@ class Student : public User
 public:
 	Student() {};
 	~Student() {};
+	string GetStudentName() { return this->name; }
 
 	void Registration() override;
 
@@ -75,29 +77,31 @@ private:
 string User::UserSignIn()
 {
 	cout << "Вход в систему\n";
+	unique_ptr<Student> student(new Student);
 
 	gotoxy(25, 11);
 	cout << "Введите логин (e-mail): ";
-	cin >> this->login ;
+	cin >> student->login;
+	
 
 	unique_ptr<Admin> ad(new Admin);
 
 	string path = ad->GetFilename();
 
-	if (this->login + ".txt" == path)
+	if (student->login + ".txt" == path)
 	{
 		system("cls");
 		gotoxy(25, 11);
 		cout << "Введите логин (e-mail) администратора системы: ";
 		string adminlogin, md5adminlogin;
-		cin >> this->login;
+		cin >> ad->login;
 
 		cout << "Введите пароль администратора системы: ";
 		string adminpass, md5adminpass;
-		cin >> this->pass;
+		cin >> ad->pass;
 
-		md5adminlogin = md5(this->login);
-		md5adminpass = md5(this->pass);
+		md5adminlogin = md5(ad->login);
+		md5adminpass = md5(ad->pass);
 
 		ifstream afin;
 
@@ -134,13 +138,13 @@ string User::UserSignIn()
 		else
 		{
 			cout << "Ошибка входа";
-			return this->login = "Зарегистрируйтесь, или войдите";
+			return this->login;
 		}	
 	}
 
 	else 
 	{		
-		path = this->folder + "/" + md5(this->login) + ".txt";		
+		path = student->folder + "/" + md5(student->login) + ".txt";
 
 		try
 		{
@@ -151,7 +155,7 @@ string User::UserSignIn()
 		{			
 			cout << "Пользователь с таким логином не найден.\n";
 			system("pause");
-			return this->login = "Зарегистрируйтесь, или войдите";
+			return this->login;
 		}
 
 		ifstream ufin(path);
@@ -171,9 +175,9 @@ string User::UserSignIn()
 				gotoxy(25, 13); 
 				cout << "Введите пароль: ";
 				string userpass, md5userpass;
-				cin >> this->pass;
+				cin >> student->pass;
 
-				md5userpass = md5(this->pass);
+				md5userpass = md5(student->pass);
 
 				int count = -2;
 				while (count)
@@ -187,12 +191,13 @@ string User::UserSignIn()
 					gotoxy(25, 14);
 					cout << "Вы успешно вошли в систему тестирования. Нажмите любую кнопку." << endl;
 					ufin.close();
-					return this->login;
+					return student->GetLogin();
 				}
 
 				else
 				{
 					throw ExceptionUser("Вы ввели неверный пароль пользователя", 4);
+					return this->login;
 				}				
 			}
 		}
@@ -219,7 +224,7 @@ string User::UserSignIn()
 		}
 		
 		ufin.close();
-		return "Зарегистрируйтесь, или войдите";
+		return this->login;;
 	}
 	
 }
@@ -238,14 +243,14 @@ inline void Admin::Registration()
 
 		fout.open(path);
 		
-		cout << "Введите логин администратора: ";
-		string login;
-		cin >> login;
+		cout << "Логин администратора: admin";
+		string login = "admin";
+		//cin >> login;
 		string md5login;
 		md5login = md5(login);
 		fout << md5login << "\n";
 
-		cout << "Введите пароль администратора: ";
+		cout << "\nВведите пароль администратора: ";
 		string pass;
 		cin >> pass;
 		string md5pass;
@@ -310,31 +315,27 @@ void Student::Registration()
 			cout << "Введите пароль: ";
 			string pass;
 			cin >> pass;				
-			cin.ignore();
 			//сохранение зашифрованного пароля
 			hash = md5(pass);
 			fout << hash << "\n";
-
+			cin.ignore();
 			gotoxy(25, 13);
 			cout << "Введите ФИО: ";
 			string name;
-			cin >> name;			
+			getline(cin, name);
 			fout << name << "\n";
-			cin.ignore();
 
 			gotoxy(25, 14);
 			cout << "Введите номер мобильного телефона: +38";
 			string telephone;
-			cin >> telephone;		
+			getline(cin, telephone);
 			fout << telephone << "\n";
-			cin.ignore();
 
 			gotoxy(25, 15);
 			cout << "Введите домашний адрес: ";
 			string adress;
-			cin >> adress;			
+			getline(cin, adress);			
 			fout << adress << "\n";
-			cin.ignore();
 
 			gotoxy(25, 16);
 			cout << "Регистрация завершена. Нажмите любую кнопку." << endl;
