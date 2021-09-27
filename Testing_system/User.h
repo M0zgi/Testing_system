@@ -26,7 +26,7 @@ public:
 	virtual void Registration() = 0;
 	
 	string GetLogin() { return this->login; }
-	string GetUserFolder() { return this->folder; }
+	string GetUserFolder() { return this->folder; } //геттер папки для хранения регистрационных данных пользователей
 	string UserSignIn();
 	
 	~User() {};
@@ -46,14 +46,18 @@ public:
 	Admin() {};
 	~Admin() {};
 
-	string GetFilename() { return filename; }
-	string GetTestFolder() { return TestFolder; }
+	string GetFilename() { return filename; } //геттер названия файла с логином и паролем администратора системы
 	string GetUsersFolder() { return UsersFolder; }
 	string GetStudentsFile() { return StudentsFile; }
+	string GetTestFolder() { return TestFolder; }
+	string GetCategoriesFile() { return CategoriesFile; }
 
 	void ChangeLogin(); //изменение логина и пароля администратора  системы
 	void DeleteUser();//удаление пользовтаеля
 	void Modification();//модификация пользовтаеля
+
+	void AddCategories();//добавленеи категорий для тестов
+	void EditCategories();//редкатирование категорий для тестов
 
 	friend bool CheckAdmin();
 
@@ -61,9 +65,10 @@ public:
 	
 private:	
 	static string filename;
-	string TestFolder = "TestFolder"; // папка для хранения тестов системы
 	string UsersFolder = "UsersFolder"; // папка для хранения реузльтатов тестирования студентов
 	string StudentsFile = "StudentsFile.txt"; // файл в котором хранятся логины и ФИО студентов
+	string TestFolder = "TestFolder"; // папка для хранения вопросов тестирования
+	string CategoriesFile = "CategoriesFile.txt"; // файл в котором хранятся категории с тестами
 };
 
 string Admin::filename = "admin.txt";
@@ -557,6 +562,172 @@ inline void Admin::Modification()
 		cout << "Catch Admin::Modification()";
 		system("pause");
 	}
+}
+
+inline void Admin::AddCategories()
+{
+	system("cls");	
+	int gotx = 6;
+	unique_ptr<Admin> admin(new Admin);
+	map <string, string> mp;
+	string path = admin->GetTestFolder() + "/" + admin->GetCategoriesFile();
+	string key, category;
+
+	int count = 0; // счетчик кол-ва разделов
+
+	ifstream ifs;
+
+	try
+	{
+		ifs.open(path);
+
+		if (!ifs.is_open())
+		{
+			gotoxy(25, gotx);
+			cout << "В системе еще нет созданных разделов тестирвоания\n";
+		}
+
+		else
+		{
+			while (!ifs.eof())
+			{					
+				getline(ifs, key);
+				getline(ifs, category);
+
+				if(key!="")
+				mp[key] = category;	
+				count++;
+			}
+			count--;
+			gotoxy(25, ++gotx);
+			cout << "В системе есть следующие разделы:\n";
+		}
+
+		ifs.close();			
+
+		for (auto it = mp.begin(); it != mp.end(); ++it)
+		{
+			gotoxy(25, ++gotx);
+			cout << it->first << ". " << it->second << "\n";
+		}
+
+		ofstream ofs;
+
+		ofs.open(path , ofstream::app);
+		cin.ignore();
+		gotoxy(25, ++gotx);
+		cout << "Введите название нового раздела: ";
+		getline(cin, category);
+		ofs << ++count << "\n";
+		ofs << category << "\n";
+		gotoxy(25, ++gotx);
+		cout << "Изменение данных завершено. \n";
+
+		ofs.close();
+
+	}
+	catch (...)
+	{
+		cout << "Ошибка в Admin::AddCategories()";
+	}
+	gotoxy(25, ++gotx);
+	system("pause");
+}
+
+inline void Admin::EditCategories()
+{	
+	system("cls");
+	int gotx = 6;
+	unique_ptr<Admin> admin(new Admin);
+	map <string, string> mp;
+	string path = admin->GetTestFolder() + "/" + admin->GetCategoriesFile();
+	string key, category;
+
+	int count = 0; // счетчик кол-ва разделов
+
+	ifstream ifs;
+
+	try
+	{
+		ifs.open(path);
+
+		if (!ifs.is_open())
+		{
+			gotoxy(25, gotx);
+			cout << "В системе еще нет созданных разделов тестирвоания\n";
+		}
+
+		else
+		{
+			while (!ifs.eof())
+			{
+				getline(ifs, key);
+				getline(ifs, category);
+
+				if (key != "")
+					mp[key] = category;
+				count++;
+			}
+			count--;
+			gotoxy(25, ++gotx);
+			cout << "В системе есть следующие разделы:\n";
+		}
+
+		ifs.close();
+
+		for (auto it = mp.begin(); it != mp.end(); ++it)
+		{
+			gotoxy(25, ++gotx);
+			cout << it->first << ". " << it->second << "\n";
+		}
+
+		cin.ignore();
+		gotoxy(25, ++gotx);
+		cout << "Введите номер раздела для редактирования: ";
+		string keyedit;
+		getline(cin, keyedit);
+
+		gotoxy(25, ++gotx);
+		cout << "Введите новое название раздела: ";
+		getline(cin, category);
+
+		auto it = mp.find(keyedit);
+
+		if (it != mp.end())
+		{
+			mp[keyedit] = category;
+		}		
+
+		if (remove(path.c_str()) != 0)
+		{
+			gotoxy(25, ++gotx);
+			perror("Ошибка удаления файла с разделами тестирования");
+		}
+			
+		else
+		{
+			gotoxy(25, ++gotx);
+			puts("Оперция удаления старого файла с разделами тестирования успешно завершена\n");
+		}			
+
+		ofstream ofs;
+		ofs.open(path, ostream::app);
+
+		for (auto it = mp.begin(); it != mp.end(); ++it)
+		{
+			ofs << it->first << "\n" << it->second << "\n";
+		}
+
+		gotoxy(25, ++gotx);
+		cout << "Изменение данных завершено. \n";
+		ofs.close();
+	}
+	catch (...)
+	{
+		cout << "Ошибка в Admin::EditCategories()";
+	}
+	gotoxy(25, ++gotx);
+	system("pause");
 }
 
 void Student::Registration()

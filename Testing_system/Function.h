@@ -54,10 +54,10 @@ void gotoxy(int, int); //с помощью этой функции вы може
 
 void ChangeCursorStatus(bool);
 
-void AdminFun1(); // пункт меню Админ 1
-void AdminFun2(); // пункт меню Админ 2
-void AdminFun3(); // пункт меню Админ 3
-void AdminFun4(); // пункт меню Админ 4 (Изменение логина и пароля)
+void AdminFun1(); // #1. Создание, удаление, модификация пользователей.
+void AdminFun2(); // #2. Просмотр статистики."
+void AdminFun3(); // #3. Управление тестированием.";
+void AdminFun4(); // #4. Изменение логина и пароля администратора";
 
 void MenuFun20(); //  пункт меню входа пользователя в систему
 void MenuFun21(); // пункт меню регистрации пользователя в системе
@@ -286,7 +286,7 @@ void AdminFun1()
 		
 		gotoxy(25, 7);
 
-		cout << "#Создание, удаление, модификация пользователей." << endl;
+		cout << "Создание, удаление, модификация пользователей." << endl;
 		gotoxy(25, 8);
 		cout << "#1. Создание";
 		gotoxy(25, 9);
@@ -303,39 +303,30 @@ void AdminFun1()
 
 		switch (key) // проверка введенного ключа.
 		{
-		case '1': // Создание.
-			
+		case '1': // Создание.			
 		{			
 			unique_ptr<Student> st(new Student);
 			st->Registration();
 			_getch();
 			break;
-		}
-		
+		}		
 
 		case '2': // Удаление
-		{
-			
+		{			
 			unique_ptr<Admin> ad(new Admin);
-			ad->DeleteUser();
-			
+			ad->DeleteUser();			
 			break;
-		}
-			
-			
+		}			
 
 		case '3': // Модификация
 		{
 			unique_ptr<Admin> ad(new Admin);
-			ad->Modification();
-			
-			
+			ad->Modification();			
 			break;
 		}		
 
-		case '0': // 'down arrow'
-		{
-			
+		case '0': // Выход
+		{			
 			break;
 		}
 			
@@ -351,28 +342,82 @@ void AdminFun1()
 //-----------------------------------------------------------------------------------------------
 void AdminFun2()
 {
-	system("cls");
-
-	gotoxy(0, 0);
-	cout << "Пользователь: "<< userName->GetUser() << " (" << userName->GetFIO() << ")";;
-
-	gotoxy(25, 10);
-	cout << "You have selected menu option (#2)" << endl;
-
-	_getch();
-	system("cls");
+	
 }
 //-----------------------------------------------------------------------------------------------
 void AdminFun3()
 {
-	system("cls");
+	char key = '1'; // для ввода ключа (стрелка вверх, стрелка вниз и т. д.);
+	//key = _getch();
+	do
+	{
+		system("cls");
+		gotoxy(0, 0);
+		cout << "Пользователь: " << userName->GetUser() << " (" << userName->GetFIO() << ")";
 
-	gotoxy(0, 0);
-	cout << "Пользователь: " << userName->GetUser() << " (" << userName->GetFIO() << ")";;
+		gotoxy(25, 7);
 
-	gotoxy(25, 10);
-	cout << "You have selected menu option (#3)" << endl;
-	_getch();
+		cout << "Управление тестированием." << endl;
+		gotoxy(25, 8);
+		cout << "#1. Создание разделов";
+		gotoxy(25, 9);
+		cout << "#2. Редактирование разделов";
+		gotoxy(25, 10);
+		cout << "#3. Создание тестов";
+		gotoxy(25, 11);
+		cout << "#4. Редактирование тестов";
+		gotoxy(25, 12);
+		cout << "#0. Выход";
+
+		gotoxy(25, 13);
+		cout << "Укажите пункт меню: ";
+		
+		cin >> key;
+
+		switch (key) // проверка введенного ключа.
+		{
+		case '1': // Создание разделов			
+		{
+			unique_ptr<Admin> ad(new Admin);
+			ad->AddCategories();
+			break;
+		}
+
+		case '2': // Редактирование разделов	
+		{
+			unique_ptr<Admin> ad(new Admin);
+
+			ad->EditCategories();
+
+			break;
+		}
+
+		case '3': // Создание тестов
+		{
+			unique_ptr<Admin> ad(new Admin);
+
+			break;
+		}
+
+		case '4': // Редактирование тестов
+		{
+			unique_ptr<Admin> ad(new Admin);
+
+			break;
+		}
+
+		case '0': // Выход
+		{
+			break;
+		}
+
+		default:
+			break;
+		}
+	} while (key != '0');
+
+
+	//_getch();
 	system("cls");
 }
 
