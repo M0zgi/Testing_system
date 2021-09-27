@@ -386,16 +386,14 @@ void AdminFun3()
 		case '2': // Редактирование разделов	
 		{
 			unique_ptr<Admin> ad(new Admin);
-
 			ad->EditCategories();
-
 			break;
 		}
 
 		case '3': // Создание тестов
 		{
 			unique_ptr<Admin> ad(new Admin);
-
+			ad->AddTests();
 			break;
 		}
 

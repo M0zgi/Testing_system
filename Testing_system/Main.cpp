@@ -23,8 +23,6 @@ int main()
 	SetConsoleCP(1251);
 	SetConsoleOutputCP(1251);
 	
-	//bool check = ;
-
 	if (!CheckAdmin())
 	{		
 		unique_ptr<Admin> admin(new Admin);		 

@@ -4,6 +4,7 @@
 #include <fstream>
 #include <exception>
 #include<map>
+#include <experimental/filesystem>
 //#include <filesystem>
 
 #include"MyExceptions.h"
@@ -13,6 +14,8 @@
 //#include"Function.h"
 
 using namespace std;
+
+namespace fs = std::experimental::filesystem;
 
 void gotoxy(int, int);
 
@@ -58,6 +61,7 @@ public:
 
 	void AddCategories();//добавленеи категорий для тестов
 	void EditCategories();//редкатирование категорий для тестов
+	void AddTests();//добавленеи тестов
 
 	friend bool CheckAdmin();
 
@@ -728,6 +732,179 @@ inline void Admin::EditCategories()
 	}
 	gotoxy(25, ++gotx);
 	system("pause");
+}
+
+inline void Admin::AddTests()
+{
+	system("cls");
+	int gotx = 6;
+	unique_ptr<Admin> admin(new Admin);
+	map <string, string> mp;
+	string path = admin->GetTestFolder() + "/" + admin->GetCategoriesFile();
+	string key, category, folder;
+
+	int count = 0; // счетчик кол-ва разделов
+
+	ifstream ifs;
+
+	try
+	{
+		ifs.open(path);
+
+		if (!ifs.is_open())
+		{
+			gotoxy(25, gotx);
+			cout << "В системе еще нет созданных разделов тестирвоания\n";
+		}
+
+		else
+		{
+			while (!ifs.eof())
+			{
+				getline(ifs, key);
+				getline(ifs, category);
+
+				if (key != "")
+					mp[key] = category;
+				count++;
+			}
+			count--;
+			gotoxy(25, ++gotx);
+			cout << "В системе есть следующие разделы:\n";
+		}
+
+		ifs.close();
+
+		for (auto it = mp.begin(); it != mp.end(); ++it)
+		{
+			gotoxy(25, ++gotx);
+			cout << it->first << ". " << it->second << "\n";
+		}
+
+		if (mp.size())
+		{
+			cin.ignore();
+			gotoxy(25, ++gotx);
+			cout << "Введите номер раздела для добавления тестов: ";
+			string keyedit;
+			getline(cin, keyedit);
+
+			auto it = mp.find(keyedit);
+
+			if (it != mp.end())
+			{
+				fs::create_directories(admin->GetTestFolder() + "/" + it->second);
+
+				path = admin->GetTestFolder() + "/" + it->second + "/" + "quantity.txt" ;
+
+				count = 1;
+				int q_key = 0, a_key = 0;
+				string question, answer;
+
+				map<int, string> mquestion;
+				map<int, string> manswer;
+
+				system("cls");
+
+				ifs.open(path);
+
+				if (!ifs.is_open())
+				{
+					gotoxy(25, gotx);
+					cout << "В системе еще нет тестов в разделе: " << it->second;
+				}
+
+				else
+				{
+					while (!ifs.eof())
+					{
+						char* buff = new char[5];
+						ifs.getline(buff, 5);
+						count = atoi(buff);
+						delete[] buff;
+					}			
+					gotoxy(25, ++gotx);
+					cout << "В системе есть " << count <<" вопросов в разделе " << it->second;
+					count++;
+				}
+
+				ifs.close();
+
+				gotoxy(25, ++gotx);
+				cout << "Добавление теста в раздел: ";
+			    cout << it->first << ". " << it->second;
+				
+				//cin.ignore();
+				gotoxy(25, ++gotx);
+				cout << "Введите вопрос: ";
+				getline(cin, question);
+
+				q_key = count;
+				mquestion.emplace(q_key, question);
+				int n;
+				gotoxy(25, ++gotx);
+				cout << "Введите количество ответов на вопрос: ";
+				cin >> n;
+				gotoxy(25, ++gotx);
+				cout << "Введите ответы на вопрос: ";
+
+				cin.ignore();
+
+				for (size_t i = 1; i < n + 1; i++)
+				{
+					gotoxy(25, ++gotx);	
+					cout << i << ". ";				
+					getline(cin, answer);
+					//cin.ignore();
+					manswer.emplace(++a_key, answer);
+				}
+
+				gotoxy(25, ++gotx);
+				cout << "Введите номер правильного ответа на вопрос: ";
+				cin >> n;
+
+				ofstream ofs;
+
+				path = admin->GetTestFolder() + "/" + it->second + "/" + "quantity.txt";
+
+				ofs.open(path);				
+				ofs << q_key;	
+				ofs.close();
+				path = admin->GetTestFolder() + "/" + it->second + "/" + to_string(q_key) + ".txt";
+				ofs.open(path);						
+				ofs << n << "\n";
+
+				for (auto it = mquestion.begin(); it != mquestion.end(); ++it)
+				{
+					ofs << it->first << ". " << it->second << "\n";
+				}
+
+				for (auto it = manswer.begin(); it != manswer.end(); ++it)
+				{
+					ofs << it->first << ". " << it->second << "\n";
+				}
+
+				ofs.close();	
+
+				gotoxy(25, ++gotx);
+				cout << "Изменение данных завершено. \n";	
+			}
+
+			else
+			{
+				gotoxy(25, ++gotx);
+				cout << "Вы ввели неверный номер раздела";
+			}			
+		}
+	}
+
+	catch (...)
+	{
+		cout << "Ошибка в Admin::AddTests()";
+	}
+	gotoxy(25, ++gotx);
+	system("pause");
+
 }
 
 void Student::Registration()
