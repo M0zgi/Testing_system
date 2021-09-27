@@ -549,7 +549,6 @@ inline void Admin::Modification()
 			}
 
 			ofs.close();
-
 		}
 
 		else
