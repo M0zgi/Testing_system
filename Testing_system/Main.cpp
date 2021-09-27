@@ -34,6 +34,10 @@ int main()
 
 	unique_ptr<Student> student(new Student);
 	fs::create_directories(student->GetUserFolder());
+
+	unique_ptr<Admin> adf(new Admin);
+	fs::create_directories(adf->GetTestFolder());
+	fs::create_directories(adf->GetUsersFolder());
 	
 	unique_ptr<Menu> menu;		
 	shared_ptr<Factory> main_menu;

@@ -26,26 +26,22 @@ bool CheckAdmin()
 		return true;
 	}
 
-	//catch (const ifstream::failure& ex)
-	//{
-	//	gotoxy(25, 13);
-	//	cout << ex.what() << "\nКод ошибки: " << ex.code() << "\n";
-	//	system("pause");
-	//}
-
 	catch (ExceptionAdmin& ex)
 	{
+		
+		gotoxy(25, 7);
 		cout << ex.what() << "Код ошибки: " << ex.GetError() << "\n";
-
+		gotoxy(25, 8);
 		cout << "В системе нет зарегистрированного администратора.\n";
+		gotoxy(25, 9);
 		cout << "Пройдите регистрацию" << "\n";
-		system("pause");
 
 		return false;
 	}
 
 	catch (...)
 	{
+		gotoxy(25, 16);
 		cout << "Ошибка в функции bool CheckAdmin()";
 	}
 }
@@ -59,13 +55,11 @@ void gotoxy(int, int); //с помощью этой функции вы може
 void ChangeCursorStatus(bool);
 
 void AdminFun1(); // пункт меню Админ 1
-
 void AdminFun2(); // пункт меню Админ 2
-
 void AdminFun3(); // пункт меню Админ 3
+void AdminFun4(); // пункт меню Админ 4 (Изменение логина и пароля)
 
 void MenuFun20(); //  пункт меню входа пользователя в систему
-
 void MenuFun21(); // пункт меню регистрации пользователя в системе
 
 void StudentFun1();
@@ -150,10 +144,10 @@ void UseMenu(string user, int ItemCount)
 		//userName->SetUser("admin");
 		gotoxy(0, 0);
 		//cout << "Пользователь: " << userName->GetUser();
-		MenuOption[0] = MenuFun21; // заполнение массива функциями.
-		MenuOption[1] = AdminFun1;
-		MenuOption[2] = AdminFun2;
-		MenuOption[3] = AdminFun3;
+		MenuOption[0] = AdminFun1; // заполнение массива функциями.
+		MenuOption[1] = AdminFun2;
+		MenuOption[2] = AdminFun3;
+		MenuOption[3] = AdminFun4;
 		MenuOption[4] = ExitOption;
 	}
 
@@ -204,6 +198,7 @@ void UseMenu(string user, int ItemCount)
 			}
 			catch (...)
 			{
+				cout << "catch (...) Function.h";
 			}
 
 			break;
@@ -246,27 +241,27 @@ string* MenuItems(string user)
 		item[0] = "#1. Создание, удаление, модификация пользователей.";
 		item[1] = "#2. Просмотр статистики.";
 		item[2] = "#3. Управление тестированием.";
-		item[3] = "#4. Управление пользователями";
-		item[4] = "#5 Exit.";
+		item[3] = "#4. Изменение логина и пароля администратора";
+		item[4] = "#5. Выход.";
 		return item;
 	}	
 
 	else if (user == "sign" )
 	{		
 		string* item = new string[3];
-		item[0] = "Вход c помощью почты";
-		item[1] = "Регистрация";		
-		item[2] = "Выход";
+		item[0] = "#1. Вход c помощью почты.";
+		item[1] = "#2. Регистрация.";		
+		item[2] = "#3. Выход.";
 		return item;
 	}
 
 	else
 	{
 		string* item = new string[4];
-		item[0] = "student Option #1.";
-		item[1] = "student Option #2.";
-		item[2] = "student Option #3.";
-		item[3] = "Exit.";
+		item[0] = "#1. student Option #1.";
+		item[1] = "#2. student Option #2.";
+		item[2] = "#3. student Option #3.";
+		item[3] = "#4. Exit.";
 		return item;
 	}
 }
@@ -281,14 +276,76 @@ void gotoxy(int xpos, int ypos)
 //-----------------------------------------------------------------------------------------------
 void AdminFun1()
 {
-	system("cls");
+	char key = '1'; // для ввода ключа (стрелка вверх, стрелка вниз и т. д.);
+	//key = _getch();
+	do 
+	{
+		system("cls");
+		gotoxy(0, 0);
+		cout << "Пользователь: " << userName->GetUser() << " (" << userName->GetFIO() << ")";
+		
+		gotoxy(25, 7);
 
-	gotoxy(0, 0);
-	cout << "Пользователь: " << userName->GetUser();
+		cout << "#Создание, удаление, модификация пользователей." << endl;
+		gotoxy(25, 8);
+		cout << "#1. Создание";
+		gotoxy(25, 9);
+		cout << "#2. Удаление";
+		gotoxy(25, 10);
+		cout << "#3. Модификация";
+		gotoxy(25, 11);
+		cout << "#0. Выход";
 
-	gotoxy(25, 10);
-	cout << "You have selected menu option (#1)" << endl;
-	_getch();
+		gotoxy(25, 12);
+		cout << "Укажите пункт меню: ";
+		
+		cin >> key;
+
+		switch (key) // проверка введенного ключа.
+		{
+		case '1': // Создание.
+			
+		{			
+			unique_ptr<Student> st(new Student);
+			st->Registration();
+			_getch();
+			break;
+		}
+		
+
+		case '2': // Удаление
+		{
+			
+			unique_ptr<Admin> ad(new Admin);
+			ad->DeleteUser();
+			
+			break;
+		}
+			
+			
+
+		case '3': // Модификация
+		{
+			unique_ptr<Admin> ad(new Admin);
+			ad->Modification();
+			
+			
+			break;
+		}		
+
+		case '0': // 'down arrow'
+		{
+			
+			break;
+		}
+			
+		default:
+			break;
+		}
+	} while (key!='0');
+
+
+	//_getch();
 	system("cls");
 }
 //-----------------------------------------------------------------------------------------------
@@ -297,10 +354,11 @@ void AdminFun2()
 	system("cls");
 
 	gotoxy(0, 0);
-	cout << "Пользователь: "<< userName->GetUser();
+	cout << "Пользователь: "<< userName->GetUser() << " (" << userName->GetFIO() << ")";;
 
 	gotoxy(25, 10);
 	cout << "You have selected menu option (#2)" << endl;
+
 	_getch();
 	system("cls");
 }
@@ -310,10 +368,25 @@ void AdminFun3()
 	system("cls");
 
 	gotoxy(0, 0);
-	cout << "Пользователь: " << userName->GetUser();
+	cout << "Пользователь: " << userName->GetUser() << " (" << userName->GetFIO() << ")";;
 
 	gotoxy(25, 10);
 	cout << "You have selected menu option (#3)" << endl;
+	_getch();
+	system("cls");
+}
+
+void AdminFun4()
+{
+	system("cls");
+
+	gotoxy(0, 0);
+	cout << "Пользователь: " << userName->GetUser() << " (" << userName->GetFIO() << ")";;
+
+	unique_ptr<Admin>admin (new Admin);
+
+	admin->ChangeLogin();
+	
 	_getch();
 	system("cls");
 }
@@ -325,18 +398,15 @@ void MenuFun20() //вход пользователя в систему
 	system("cls");
 
 	gotoxy(0, 0);
-	cout << "Пользователь: " << userName->GetUser();
-	gotoxy(25, 10);
+	cout << "Пользователь: " << userName->GetUser() << " (" << userName->GetFIO() << ")";;
+	gotoxy(25, 7);
 	
 	//Вход через почту
-	gotoxy(25, 11);
 	unique_ptr<Student> user(new Student);
 
 	string name;
 
 	name = user->UserSignIn();
-
-	//userName->SetUser(name);
 
 	if (name == "admin")
 	{
@@ -352,6 +422,7 @@ void MenuFun20() //вход пользователя в систему
 
 	else if (name == userName->GetUser())
 	{
+		gotoxy(25, 13);
 		cout << "Вход в систему не удался";
 	}
 
@@ -375,9 +446,9 @@ void MenuFun21() // регистрация пользователя
 	system("cls");
 
 	gotoxy(0, 0);
-	cout << "Пользователь: " << userName->GetUser();
+	cout << "Пользователь: " << userName->GetUser() << " (" << userName->GetFIO() << ")";;
 
-	gotoxy(25, 10);
+	gotoxy(25, 7);
 	unique_ptr<Student> st(new Student);
 	st->Registration();
 
@@ -393,9 +464,9 @@ void StudentFun1() // регистрация пользователя
 	system("cls");
 
 	gotoxy(0, 0);
-	cout << "Пользователь: " << userName->GetUser();
+	cout << "Пользователь: " << userName->GetUser() << " (" << userName->GetFIO() << ")";;
 
-	gotoxy(25, 10);
+	gotoxy(25, 7);
 
 	_getch();
 	system("cls");
@@ -409,9 +480,9 @@ void StudentFun2() //
 	system("cls");
 
 	gotoxy(0, 0);
-	cout << "Пользователь: " << userName->GetUser();
+	cout << "Пользователь: " << userName->GetUser() << " (" << userName->GetFIO() << ")";;
 
-	gotoxy(25, 10);
+	gotoxy(25, 7);
 
 	_getch();
 	system("cls");
@@ -425,9 +496,9 @@ void StudentFun3() //
 	system("cls");
 
 	gotoxy(0, 0);
-	cout << "Пользователь: " << userName->GetUser();
+	cout << "Пользователь: " << userName->GetUser() << " (" << userName->GetFIO() << ")";;
 
-	gotoxy(25, 10);
+	gotoxy(25, 7);
 
 	_getch();
 	system("cls");
@@ -437,7 +508,7 @@ void StudentFun3() //
 void ExitOption()
 {
 	gotoxy(30, 15);
-	cout << "Exitting..." << endl;
+	cout << "Выход..." << endl;
 	_getch();
 	exit(0);
 }
