@@ -95,6 +95,8 @@ public:
 
 	void Registration() override;
 
+	void NewTest(); // запуск нового тестирования
+
 private:
 	string filename;
 	string name;
@@ -220,7 +222,10 @@ string User::UserSignIn()
 				if (md5userpass == userpass)
 				{
 					gotoxy(25, 13);
-					cout << "Вы успешно вошли в систему тестирования. Нажмите любую кнопку." << endl;
+					cout << "Вы успешно вошли в систему тестирования." << endl;
+					gotoxy(25, 14);
+					system("pause");
+					cin.ignore();
 					ufin.close();
 					return student->GetLogin();
 				}
@@ -1434,4 +1439,122 @@ void Student::Registration()
 		cout << "Ошибка в Student::Registration()";
 		system("pause");
 	}	
+}
+
+inline void Student::NewTest()
+{
+	//system("cls");
+	
+	int gotx = 6;
+	unique_ptr<Admin> admin(new Admin);
+	map <string, string> mp;
+	string path = admin->GetTestFolder() + "/" + admin->GetCategoriesFile();
+	string key, category, folder;
+
+	int count = 0; // счетчик кол-ва разделов
+
+	ifstream ifs;
+
+	try
+	{
+		ifs.open(path);
+
+		if (!ifs.is_open())
+		{
+			gotoxy(25, gotx);
+			cout << "В системе еще нет созданных разделов тестирования";
+		}
+
+		else
+		{
+			while (!ifs.eof())
+			{
+				getline(ifs, key);
+				getline(ifs, category);
+
+				if (key != "")
+					mp[key] = category;
+				count++;
+			}
+			count--;
+			gotoxy(25, ++gotx);
+			cout << "В системе есть следующие разделы:";
+		}
+
+		ifs.close();
+
+
+		for (auto it = mp.begin(); it != mp.end(); ++it)
+		{
+			gotoxy(25, ++gotx);
+			cout << it->first << ". " << it->second << "\n";
+		}
+
+		
+		gotoxy(25, ++gotx);
+		cout << "Введите номер категории для выбора теста: ";
+		string keyedit;
+		getline(cin, keyedit);
+		
+		auto it = mp.find(keyedit);
+
+		if (it != mp.end())
+		{
+			gotoxy(25, ++gotx);
+
+
+			path = admin->GetTestFolder() + "/" + it->second + "/" + admin->GetTestsName();
+
+			count = 1;
+
+			mp.clear(); //очищаем map с категориями разделов, и заполняем его названиями существующих тестов
+
+			ifs.open(path);
+
+			bool ckfile = ifs.is_open();
+
+			if (ckfile)
+			{
+				while (!ifs.eof())
+				{
+					getline(ifs, key);
+					getline(ifs, category);
+
+					if (key != "")
+						mp[key] = category;
+					count++;
+				}
+				count--;
+
+				for (auto it = mp.begin(); it != mp.end(); ++it)
+				{
+					gotoxy(25, ++gotx);
+					cout << it->first << ". " << it->second << "\n";
+				}
+			}
+			ifs.close();
+			
+			if (!mp.size())
+			{
+				gotoxy(25, ++gotx);
+				cout << "В выбранной категории еще нет тестов: ";
+			}
+			
+			
+
+			
+		}
+
+	}
+
+	catch (...)
+	{
+		gotoxy(25, ++gotx);
+		cout << "Ошибка в Student::NewTest()";
+		gotoxy(25, ++gotx); 
+		system("pause");
+	}
+	
+	gotoxy(25, ++gotx);
+	system("pause");
 }
