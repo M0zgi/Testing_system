@@ -1196,7 +1196,7 @@ inline void Admin::AddTests()
 					}
 
 					gotoxy(25, ++gotx);
-					cout << "Введите номер названия теста для редактирования: ";
+					cout << "Введите номер Теста для создания к нему вопросов: ";
 					getline(cin, keyedit);
 
 					auto it_test = map_test.find(keyedit);
@@ -1281,7 +1281,7 @@ inline void Admin::AddTests()
 
 						for (auto it = mquestion.begin(); it != mquestion.end(); ++it)
 						{
-							ofs << it->first << ". " << it->second << "\n";
+							ofs << it->second << "\n";
 						}
 
 						for (auto it = manswer.begin(); it != manswer.end(); ++it)
@@ -1461,7 +1461,7 @@ inline void Student::NewTest()
 
 		if (!ifs.is_open())
 		{
-			gotoxy(25, gotx);
+			gotoxy(25, ++gotx);
 			cout << "В системе еще нет созданных разделов тестирования";
 		}
 
@@ -1504,7 +1504,10 @@ inline void Student::NewTest()
 
 
 			path = admin->GetTestFolder() + "/" + it->second + "/" + admin->GetTestsName();
-
+			
+			string path_questions;
+			string path_quantity = path_questions = admin->GetTestFolder() + "/" + it->second;
+			
 			count = 1;
 
 			mp.clear(); //очищаем map с категориями разделов, и заполняем его названиями существующих тестов
@@ -1531,20 +1534,82 @@ inline void Student::NewTest()
 					gotoxy(25, ++gotx);
 					cout << it->first << ". " << it->second << "\n";
 				}
+
+				gotoxy(25, ++gotx);
+				cout << "Введите номер теста: ";
+				keyedit;
+				getline(cin, keyedit);
+
+				it = mp.find(keyedit);
+
+				if (it != mp.end())
+				{
+					
+
+					path_quantity += "/" + it->second + "/" + "quantity.txt";
+
+					ifstream ifn;
+					int n = 0;
+
+					ifn.open(path_quantity);
+
+					if (!ifn.is_open())
+					{
+						gotoxy(25, ++gotx);
+						cout << "В системе еще нет созданных разделов тестирования";
+					}
+
+					else
+					{
+						while (!ifn.eof())
+						{
+							char* buff = new char[5];
+							ifn.getline(buff, 5);
+							n = atoi(buff);
+							delete[] buff;
+						}
+						gotoxy(25, ++gotx);
+						cout << "Во время тестирования вам нужно будет ответить на " << n << " вопроса(ов) в выбранной категории " << it->second;
+					}
+
+					ifn.close();
+
+					
+					string questions, answer, path_helper;
+					path_helper = path_questions += "/" + it->second;
+					//int colum = 1;
+
+					//cin.ignore();
+					
+					for (size_t i = 1; i < n + 1; i++)
+					{		
+						cout << "Вопрос № " << i << ".\n";
+						
+						path_questions = path_helper + "/" + to_string(i) + ".txt";
+
+						ifn.open(path_questions);
+
+						getline(ifn, answer);
+
+						while (!ifn.eof())
+						{ 
+							questions = "";
+							getline(ifn, questions);
+							cout << questions << "\n";
+						}
+						ifn.close();
+					}	
+
+				}
 			}
-			ifs.close();
+			ifs.close();			
 			
 			if (!mp.size())
 			{
 				gotoxy(25, ++gotx);
 				cout << "В выбранной категории еще нет тестов: ";
-			}
-			
-			
-
-			
+			}			
 		}
-
 	}
 
 	catch (...)
