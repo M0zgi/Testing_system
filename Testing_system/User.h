@@ -235,22 +235,26 @@ string User::UserSignIn()
 
 		catch (const ofstream::failure& ex)
 		{
-			gotoxy(25, 13);
+			gotoxy(25, 9);
 			cout << ex.what() << " Код ошибки: " << ex.code() << "\n";
+			gotoxy(25, 10);
 			system("pause");
 		}
 
 		catch (ExceptionUser& ex)
 		{
-			gotoxy(25, 13);
+			gotoxy(25, 9);
 			cout << ex.what() << " Код ошибки: " << ex.GetError() << "\n";
+			gotoxy(25, 10);
 			system("pause");
+			
 		}
 
 		catch (...)
 		{
-			gotoxy(25, 13);
+			gotoxy(25, 9);
 			cout << "Ошибка в string User::UserSignIn()";
+			gotoxy(25, 10);
 			system("pause");
 		}
 		
@@ -359,8 +363,13 @@ inline void Admin::DeleteUser()
 {
 	//unique_ptr<Admin> admin(new Admin);	
 	map <string, string> mp;
+	map <string, string> mp_users;
 	string path = this->GetUsersFolder() + "/" + this->GetStudentsFile();
-	string key, data;	
+
+	//папка для хранения личных данных в одном файле по каждому пользоввателю
+	string path2 = this->GetUsersFolder() + "/" + this->GetUsersInfo();
+
+	string key, data, key_u, data_u;
 	ifstream ifs;
 	int gotx = 6;
 	system("cls");
@@ -390,6 +399,27 @@ inline void Admin::DeleteUser()
 		}
 		ifs.close();
 
+		ifs.open(path2);
+
+		if (!ifs.is_open())
+		{
+			gotoxy(25, ++gotx);
+			cout << "Ошибка открытия файла Admin::DeleteUser() path2";
+		}
+
+		while (!ifs.eof())
+		{
+			key_u = "";
+			data_u = "";
+			getline(ifs, key_u);
+			if (key_u != "")
+				getline(ifs, data_u);
+
+			if (key_u != "")
+				mp_users[key_u] = data_u;
+		}
+		ifs.close();
+
 		this->PrintStudents();
 
 		gotoxy(25, ++gotx);
@@ -413,6 +443,8 @@ inline void Admin::DeleteUser()
 			cin >> data;
 			login = this->GetUserLogins() + "/" + md5(data) + ".txt";
 
+			string userfolder = this->GetUsersFolder() + "/" + data + "/";
+
 			if (remove(login.c_str()) != 0)
 			{
 				gotoxy(25, ++gotx);
@@ -430,13 +462,21 @@ inline void Admin::DeleteUser()
 					perror("Ошибка удаления файла с базой студентов");
 				}
 
+
 				else
 				{
 					gotoxy(25, ++gotx);
 					puts("Оперция удаления старого файла базы студентов успешно завершена");
 					mp.erase(key);
-				}				
+					mp_users.erase(key);
+				}		
+
+				std::uintmax_t n = fs::remove_all(userfolder.c_str());
+
+
 			}		
+
+
 
 			/*cout << endl;
 
@@ -454,6 +494,15 @@ inline void Admin::DeleteUser()
 			}
 
 			ofs.close();	
+
+			ofs.open(path2);
+
+			for (auto it = mp_users.begin(); it != mp_users.end(); ++it)
+			{
+				ofs << it->first << "\n" << it->second << "\n";
+			}
+
+			ofs.close();
 
 			gotoxy(25, ++gotx);
 			system("pause");
@@ -547,21 +596,7 @@ inline void Admin::PrintStudentsFull()
 		{
 			str = "";
 			getline(ifs, str);
-			
-
-			if (count != 3)
-			{
-				cout << " | ";
-				cout << str;
-			}		
-
-			count++;
-
-			if (count == 3)
-			{
-				count = 0;
-				cout << " | " << "\n";
-			}			
+			cout << str;		
 		}
 	}
 
@@ -570,10 +605,15 @@ inline void Admin::PrintStudentsFull()
 
 inline void Admin::Modification()
 {
-	unique_ptr<Admin> admin(new Admin);
+	//unique_ptr<Admin> admin(new Admin);
+	map <string, string> mp_users;
 	map <string, string> mp;
-	string path = admin->GetUsersFolder() + "/" + admin->GetStudentsFile();
-	string key, data;
+	string path = this->GetUsersFolder() + "/" + this->GetStudentsFile();
+
+	//папка для хранения личных данных в одном файле по каждому пользоввателю
+	string path2 = this->GetUsersFolder() + "/" + this->GetUsersInfo();
+
+	string key, data, key_u, data_u;
 	ifstream ifs;
 	int gotx = 6;
 	system("cls");
@@ -602,7 +642,28 @@ inline void Admin::Modification()
 		}
 		ifs.close();
 
-		admin->PrintStudents();
+		ifs.open(path2);
+
+		if (!ifs.is_open())
+		{
+			gotoxy(25, ++gotx);
+			cout << "Ошибка открытия файла Admin::DeleteUser() path2";
+		}
+
+		while (!ifs.eof())
+		{
+			key_u = "";
+			data_u = "";
+			getline(ifs, key_u);
+			if (key_u != "")
+				getline(ifs, data_u);
+
+			if (key_u != "")
+				mp_users[key_u] = data_u;
+		}
+		ifs.close();
+
+		this->PrintStudents();
 
 		gotoxy(25, ++gotx);
 		cout << "Введите мобильный номер студента для модификации: ";
@@ -625,7 +686,7 @@ inline void Admin::Modification()
 			cout << "Введите логин студента для модификации: ";
 			string login;
 			cin >> data;
-			login = admin->GetUserLogins() + "/" + md5(data) + ".txt";
+			login = this->GetUserLogins() + "/" + md5(data) + ".txt";
 
 			if (remove(login.c_str()) != 0)
 			{
@@ -654,7 +715,7 @@ inline void Admin::Modification()
 
 			ofstream ofs;
 
-			ofs.open(admin->GetUserLogins() + "/" + md5(data) + ".txt");
+			ofs.open(this->GetUserLogins() + "/" + md5(data) + ".txt");
 			gotoxy(25, ++gotx);
 			cout << "Логин студента (e-mail): " << data << "\n";
 			ofs << md5(data) << "\n";
@@ -670,17 +731,17 @@ inline void Admin::Modification()
 			cout << "Введите ФИО: ";
 			string name;
 			getline(cin, name);
-			ofs << name << "\n";
+			//ofs << name << "\n";
 			gotoxy(25, ++gotx);
 			cout << "Введите номер мобильного телефона: +38";
 			string telephone;
 			getline(cin, telephone);
-			ofs << telephone << "\n";
+			//ofs << telephone << "\n";
 			gotoxy(25, ++gotx);
 			cout << "Введите домашний адрес: ";
 			string adress;
 			getline(cin, adress);
-			ofs << adress << "\n";
+			//ofs << adress << "\n";
 			system("cls");
 			
 
@@ -688,6 +749,9 @@ inline void Admin::Modification()
 
 			mp.erase(key);
 
+			mp_users.erase(key);
+			mp_users.emplace(telephone, "ФИО: " + name + ". Домашний адрес: " + adress);
+			
 			mp.emplace(telephone, name + " (логин: " + data + ")");
 
 			cout << endl;
@@ -705,6 +769,16 @@ inline void Admin::Modification()
 			}
 
 			ofs.close();
+
+			ofs.open(path2);
+
+			for (auto it = mp_users.begin(); it != mp_users.end(); ++it)
+			{
+				ofs << it->first << "\n" << it->second << "\n";
+			}
+
+			ofs.close();
+			
 		}
 
 		else
@@ -1302,16 +1376,15 @@ void Student::Registration()
 			cout << "Введите ФИО: ";
 			string name;
 			getline(cin, name);
-			sfout << name << "\n";
-			ufout << name << "\n";
+			//sfout << name << "\n";
+			//ufout << name << "\n";
 			
 
 			gotoxy(25, 11);
 			cout << "Введите номер мобильного телефона: +38";
 			string telephone;
 			getline(cin, telephone);
-			sfout << telephone << "\n";
-			ufout << telephone << "\n";
+			//sfout << telephone << "\n";			
 
 			afout << telephone << "\n" << name << " (логин: " << this->login << ")" << "\n";
 			afout.close();
@@ -1320,8 +1393,10 @@ void Student::Registration()
 			cout << "Введите домашний адрес: ";
 			string adress;
 			getline(cin, adress);			
-			sfout << adress << "\n";
-			ufout << adress << "\n";
+			//sfout << adress << "\n";
+
+			ufout << telephone << "\n" << "ФИО: " << name << ". Домашний адрес: " <<  adress << "\n";
+
 			gotoxy(25, 13);
 			cout << "Регистрация завершена." << endl;
 			sfout.close();		
