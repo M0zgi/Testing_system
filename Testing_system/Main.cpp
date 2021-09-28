@@ -31,7 +31,7 @@ int main()
 	}
 
 	unique_ptr<Student> student(new Student);
-	fs::create_directories(student->GetUserFolder());
+	fs::create_directories(student->GetUserLogins());
 
 	unique_ptr<Admin> adf(new Admin);
 	fs::create_directories(adf->GetTestFolder());

@@ -87,7 +87,7 @@ public:
 	{
 		unique_ptr<Student> student(new Student);
 
-		string path = student->GetUserFolder() + "/" + md5(user) + ".txt";
+		string path = student->GetUserLogins() + "/" + md5(user) + ".txt";
 		
 		ifstream sfin;
 		sfin.exceptions(ifstream::badbit | ifstream::failbit);
@@ -277,26 +277,29 @@ void gotoxy(int xpos, int ypos)
 void AdminFun1()
 {
 	char key = '1'; // для ввода ключа (стрелка вверх, стрелка вниз и т. д.);
-	//key = _getch();
+	//char key = _getch();
 	do 
 	{
 		system("cls");
 		gotoxy(0, 0);
 		cout << "Пользователь: " << userName->GetUser() << " (" << userName->GetFIO() << ")";
-		
-		gotoxy(25, 7);
+		int gotx = 6;
+
+		gotoxy(25, ++gotx);
 
 		cout << "Создание, удаление, модификация пользователей." << endl;
-		gotoxy(25, 8);
+		gotoxy(25, ++gotx);
 		cout << "#1. Создание";
-		gotoxy(25, 9);
+		gotoxy(25, ++gotx);
 		cout << "#2. Удаление";
-		gotoxy(25, 10);
+		gotoxy(25, ++gotx);
 		cout << "#3. Модификация";
-		gotoxy(25, 11);
+		gotoxy(25, ++gotx);
+		cout << "#4. Вывод всех пользователей";
+		gotoxy(25, ++gotx);
 		cout << "#0. Выход";
 
-		gotoxy(25, 12);
+		gotoxy(25, ++gotx);
 		cout << "Укажите пункт меню: ";
 		
 		cin >> key;
@@ -307,7 +310,7 @@ void AdminFun1()
 		{			
 			unique_ptr<Student> st(new Student);
 			st->Registration();
-			_getch();
+			//_getch();
 			break;
 		}		
 
@@ -323,7 +326,17 @@ void AdminFun1()
 			unique_ptr<Admin> ad(new Admin);
 			ad->Modification();			
 			break;
-		}		
+		}	
+
+		case '4': // Вывод на экран списка зарегистрированных пользователей
+		{
+			system("cls"); 
+			unique_ptr<Admin> ad(new Admin);
+			ad->PrintStudentsFull();
+
+			_getch();
+			break;
+		}
 
 		case '0': // Выход
 		{			
@@ -401,6 +414,8 @@ void AdminFun3()
 		{
 			unique_ptr<Admin> ad(new Admin);
 
+			ad->AddTestsName();
+
 			break;
 		}
 
@@ -430,7 +445,7 @@ void AdminFun4()
 
 	admin->ChangeLogin();
 	
-	_getch();
+	//_getch();
 	system("cls");
 }
 
@@ -465,7 +480,7 @@ void MenuFun20() //вход пользователя в систему
 
 	else if (name == userName->GetUser())
 	{
-		gotoxy(25, 13);
+		gotoxy(25, 12);
 		cout << "Вход в систему не удался";
 	}
 
