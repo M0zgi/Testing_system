@@ -7,13 +7,12 @@
 #include <experimental/filesystem>
 #include <ctime>
 #include<windows.h>
-//#include <filesystem>
+#include<vector>
 
 #include"MyExceptions.h"
 #include"Menu.h"
 #include"Encryption.h"
 #include"md5.h"
-//#include"Function.h"
 
 using namespace std;
 
@@ -56,6 +55,7 @@ void SetColor(int text, ConsoleColor background)
 	SetConsoleTextAttribute(hStdOut, (WORD)((background << 4) | text));
 }
 
+
 class User
 {
 public:
@@ -64,8 +64,11 @@ public:
 	User(string login, string pass) : login(login), pass(pass) {}
 	
 	virtual void Registration() = 0;
+	virtual void ShowUserGrade() = 0;
 	
 	void SetLogin(string login) { this->login = login; }
+
+	void Remove_test(int n, string path_users_name_test, string second, string test_time); //метод удаления пройденного теста
 
 	string GetLogin() { return this->login; }
 	string GetUserLogins() { return this->folder; } //геттер папки для хранения регистрационных данных пользователей
@@ -77,10 +80,11 @@ public:
 	string GetCategoriesFile() { return CategoriesFile; }
 	string GetStudentsFile() { return StudentsFile; }
 
+	int GetGrade(int ball_count , int n);
+
 	~User() {};
 
 protected:
-
 
 	string login;
 	string pass;
@@ -101,9 +105,7 @@ public:
 	Admin() {};
 	~Admin() {};
 
-	string GetFilename() { return filename; } //геттер названия файла с логином и паролем администратора системы
-	
-	
+	string GetFilename() { return filename; } //геттер названия файла с логином и паролем администратора системы	
 
 	void ChangeLogin(); //изменение логина и пароля администратора  системы
 	void DeleteUser();//удаление пользовтаеля
@@ -119,6 +121,7 @@ public:
 	friend bool CheckAdmin();
 
 	void Registration() override;
+	void ShowUserGrade() override {};
 	
 private:	
 	static string filename;
@@ -135,6 +138,7 @@ public:
 	string GetStudentName() { return this->name; }
 
 	void Registration() override;
+	void ShowUserGrade() override;
 
 	void NewTest(); // запуск нового тестирования
 
@@ -147,10 +151,10 @@ private:
 
 string User::UserSignIn()
 {
+	int gotx = 6; 
+	gotoxy(25, ++gotx);
 	cout << "Вход в систему\n";
-	//unique_ptr<Student> student(new Student);
-
-	int gotx = 6;
+	
 	gotoxy(25, ++gotx);
 	cout << "Введите логин (e-mail): ";
 	cin >> this->login;	
@@ -314,7 +318,6 @@ string User::UserSignIn()
 
 inline void Admin::Registration()
 {		
-
 	int gotx = 10;
 	gotoxy(25, ++gotx);
 	cout << "Регистрация администратора системы тестирования";	
@@ -324,9 +327,7 @@ inline void Admin::Registration()
 
 	try
 	{
-		string path = Admin::filename;
-
-		
+		string path = Admin::filename;		
 		
 		gotoxy(25, ++gotx);
 		cout << "Логин администратора:";
@@ -374,8 +375,7 @@ inline void Admin::Registration()
 
 inline void Admin::ChangeLogin()
 {
-	int gotx = 6;
-	
+	int gotx = 6;	
 	ofstream fout;
 	fout.exceptions(ofstream::badbit | ofstream::failbit);
 
@@ -408,8 +408,7 @@ inline void Admin::ChangeLogin()
 		gotoxy(25, ++gotx);
 		cout << "Операция успешна." << endl;
 		gotoxy(25, ++gotx);
-		system("pause");
-		
+		system("pause");		
 	}
 
 	catch (const ifstream::failure& ex)
@@ -429,7 +428,6 @@ inline void Admin::ChangeLogin()
 
 inline void Admin::DeleteUser()
 {
-	//unique_ptr<Admin> admin(new Admin);	
 	map <string, string> mp;
 	map <string, string> mp_users;
 	string path = this->GetUsersFolder() + "/" + this->GetStudentsFile();
@@ -530,7 +528,6 @@ inline void Admin::DeleteUser()
 					perror("Ошибка удаления файла с базой студентов");
 				}
 
-
 				else
 				{
 					gotoxy(25, ++gotx);
@@ -541,10 +538,7 @@ inline void Admin::DeleteUser()
 
 				std::uintmax_t n = fs::remove_all(userfolder.c_str());
 
-
 			}		
-
-
 
 			/*cout << endl;
 
@@ -598,7 +592,6 @@ inline void Admin::DeleteUser()
 
 inline void Admin::PrintStudents()
 {
-	//unique_ptr<Admin> admin(new Admin);
 	map <string, string> mp;
 	string path = this->GetUsersFolder() + "/" + this->GetStudentsFile();
 	string key, data;
@@ -673,7 +666,6 @@ inline void Admin::PrintStudentsFull()
 
 inline void Admin::Modification()
 {
-	//unique_ptr<Admin> admin(new Admin);
 	map <string, string> mp_users;
 	map <string, string> mp;
 	string path = this->GetUsersFolder() + "/" + this->GetStudentsFile();
@@ -741,7 +733,6 @@ inline void Admin::Modification()
 
 		if (it != mp.end())
 		{
-
 			int gotx = 6;
 		
 			system("cls");
@@ -778,8 +769,7 @@ inline void Admin::Modification()
 			{
 				gotoxy(25, ++gotx);
 				puts("Оперция удаления старого файла базы студентов успешно завершена");
-			}
-			
+			}			
 
 			ofstream ofs;
 
@@ -811,7 +801,6 @@ inline void Admin::Modification()
 			getline(cin, adress);
 			//ofs << adress << "\n";
 			system("cls");
-			
 
 			ofs.close();
 
@@ -821,8 +810,7 @@ inline void Admin::Modification()
 			mp_users.emplace(telephone, "ФИО: " + name + ". Домашний адрес: " + adress);
 			
 			mp.emplace(telephone, name + " (логин: " + data + ")");
-
-			cout << endl;
+			cout << "\n";
 
 			/*for (auto it = mp.begin(); it != mp.end(); ++it)
 			{
@@ -845,8 +833,7 @@ inline void Admin::Modification()
 				ofs << it->first << "\n" << it->second << "\n";
 			}
 
-			ofs.close();
-			
+			ofs.close();			
 		}
 
 		else
@@ -875,7 +862,6 @@ inline void Admin::AddCategories()
 {
 	system("cls");	
 	int gotx = 6;
-	//unique_ptr<Admin> admin(new Admin);
 	map <string, string> mp;
 	string path = this->GetTestFolder() + "/" + this->GetCategoriesFile();
 	string key, category;
@@ -1038,8 +1024,7 @@ inline void Admin::EditCategories()
 }
 
 inline void Admin::AddTestsName()
-{
-	
+{	
 	system("cls");
 	int gotx = 6;
 	//unique_ptr<Admin> admin(new Admin);
@@ -1487,8 +1472,7 @@ void Student::Registration()
 		//проверка на логин администратора системы
 
 		if (this->login + ".txt" == path)
-		{
-			
+		{			
 			throw ExceptionUser("Регистрация с веденным логином запрещена", 2);
 		}
 
@@ -1504,10 +1488,8 @@ void Student::Registration()
 			
 			sfout.open(this->folder + "/" + md5(this->login) + ".txt");
 			
-			afout.open(path, ofstream::app);
-			
+			afout.open(path, ofstream::app);			
 			ufout.open(path2, ofstream::app);
-
 
 			string hash = md5(this->login);
 			sfout << hash << "\n";
@@ -1525,8 +1507,7 @@ void Student::Registration()
 			string name;
 			getline(cin, name);
 			//sfout << name << "\n";
-			//ufout << name << "\n";
-			
+			//ufout << name << "\n";			
 
 			gotoxy(25, ++gotx);
 			cout << "Введите номер мобильного телефона: +38";
@@ -1561,8 +1542,7 @@ void Student::Registration()
 	}
 
 	catch (const ofstream::failure& ex)
-	{
-		
+	{		
 		gotx += 2;
 		gotoxy(25, ++gotx);
 		cout << ex.what() << " Код ошибки: " << ex.code() << "\n";
@@ -1570,8 +1550,7 @@ void Student::Registration()
 	}
 
 	catch (ExceptionUser& ex)
-	{
-		
+	{		
 		gotoxy(25, ++gotx);
 		cout << ex.what() << " Код ошибки: " << ex.GetError() << "\n";
 		gotx += 2;
@@ -1588,15 +1567,12 @@ void Student::Registration()
 }
 
 inline void Student::NewTest()
-{
-	//system("cls");
-	
+{	
 	int gotx = 6;
-	//unique_ptr<Admin> admin(new Admin);
 	map <string, string> mp;
 	string path = this->GetTestFolder() + "/" + this->GetCategoriesFile();
 	string key, category, folder;
-
+	
 	int count = 0; // счетчик кол-ва разделов
 
 	ifstream ifs;
@@ -1752,16 +1728,15 @@ inline void Student::NewTest()
 						int ball_count = 0; // подсчет правильных ответов
 						int test_count = 0; // подсчет кол-ва пройденных ответов на выбранный тест
 
+						int test_grade; // итоговая оценка за тест 
+
 						ofstream users_name_test;
 						users_name_test.exceptions(ofstream::badbit | ofstream::failbit);
 						try
 						{
 							users_name_test.open(path_users_test);
-
 							users_name_test << test_count;
-
 							users_name_test.close();
-
 						}
 						catch (const ofstream::failure& ex)
 						{
@@ -1811,21 +1786,63 @@ inline void Student::NewTest()
 							gotx++;
 							if (to_string(un) == answer)
 								ball_count++;
-
 							test_count++;
 
 							try
 							{
 								users_name_test.open(path_users_test);
-
 								users_name_test << test_count;
-
 								users_name_test.close();
-
 							}
 							catch (const ofstream::failure& ex)
 							{
 								gotoxy(25, ++gotx);
+								cout << ex.what() << "\nКод ошибки: " << ex.code() << "\n";
+								system("pause");
+							}
+						}
+
+						//Если тест пройден полностью, открываем файл, где записаны все начатые тесты
+						//находим и удаляем тест из списка
+						if (test_count = n)
+						{				
+							this->Remove_test(n, path_users_name_test, it->second, test_time);
+							
+							test_grade = this->GetGrade(ball_count, n);
+							gotx += 2;
+							gotoxy(25, ++gotx);
+							SetColor(3, Black);							
+							cout << "Тест пройден полностью";
+							SetColor(15, Black);
+							gotoxy(25, ++gotx);
+							cout << "Ваша оценка: " << test_grade;							
+
+							gotoxy(25, ++gotx);
+							cout << "Правильных ответов: ";
+							
+							SetColor(11, Black);
+							cout << ball_count;
+							SetColor(15, Black);
+							cout << " из ";
+							SetColor(1, Black);
+							cout << n;
+							SetColor(15, Black);
+							ofstream save_test;
+							save_test.exceptions(ofstream::badbit | ofstream::failbit);
+
+							//файл сохранения пройденых тестов с оценкой
+
+							path_helper = this->GetUsersFolder() + "/" + this->GetLogin() + "/" + "successful_test.txt";
+
+							try
+							{
+								save_test.open(path_helper, ofstream::app);
+								save_test << "Тест: " << it->second + " Дата и время сдачи: " + test_time + " пройден полностью. Оценка: " << test_grade << " Правильных ответов: " << ball_count << " из " << n << "\n";
+								save_test.close();
+							}
+							catch (const ofstream::failure& ex)
+							{
+								gotoxy(25, 4);
 								cout << ex.what() << "\nКод ошибки: " << ex.code() << "\n";
 								system("pause");
 							}
@@ -1863,12 +1880,199 @@ inline void Student::NewTest()
 	system("pause");
 }
 
+inline void User::Remove_test(int n, string path_users_name_test, string second, string test_time)
+{
+	vector<string> v_delete_finish_test;
+	ifstream p_in_delete_test;
+	//p_in_delete_test.exceptions(ifstream::badbit | ifstream::failbit);
+	try
+	{
+		p_in_delete_test.open(path_users_name_test);
+
+		string str_delete_test; //в эту строку считываем из файла запущенные тесты
+		string str_delete_test_search = second + " (" + test_time + ")"; //в этой строке содержится название теста для удаления
+
+		while (!p_in_delete_test.eof())
+		{
+			str_delete_test = "";
+			getline(p_in_delete_test, str_delete_test);
+
+			if (str_delete_test != str_delete_test_search && str_delete_test != "")
+			{
+				v_delete_finish_test.push_back(str_delete_test);
+			}
+		}
+
+		p_in_delete_test.close();
+		ofstream p_out_delete_test;
+		//p_out_delete_test.exceptions(ofstream::badbit | ofstream::failbit);
+
+		p_out_delete_test.open(path_users_name_test);
+
+		if (v_delete_finish_test.size())
+		{
+			for (size_t i = 0; i < v_delete_finish_test.size(); i++)
+			{
+				p_out_delete_test << v_delete_finish_test[i] << "\n";
+			}
+		}
+
+		p_out_delete_test.close();
+		string path = this->GetUsersFolder() + "/" + this->login + "/" + second + " (" + test_time + ").txt";
+		remove(path.c_str());
+	}	
+
+	catch (const std:: out_of_range &ex)
+	{
+		gotoxy(25, 4);
+		cout << ex.what() << "\n";
+	}
+
+	catch (...)
+	{
+		gotoxy(25, 2);
+		cout << "Ошибка в User::Remove_test()";
+	}
+}
+
+inline int User::GetGrade(int ball_count, int n)
+{
+	int grade;
+
+	if(ball_count == n)
+	{
+		grade = 12;
+		return grade;
+	}
+
+	int failtest = n - ball_count;
+
+	double fraction = (n - failtest) / (double)n * 100;
+
+	if (fraction >= 95)
+	{
+		grade = 12;
+		return grade;
+	}
+
+	else if (fraction >= 88)
+	{
+		grade = 11;
+		return grade;
+	}
+
+	else if (fraction >= 80)
+	{
+		grade = 10;
+		return grade;
+	}
+
+	else if (fraction >= 74)
+	{
+		grade = 9;
+		return grade;
+	}
+	
+	else if (fraction >= 69)
+	{
+		grade = 8;
+		return grade;
+	}
+
+	else if (fraction >= 59)
+	{
+		grade = 7;
+		return grade;
+	}
+	
+	else if (fraction >= 50)
+	{
+		grade = 6;
+		return grade;
+	}
+	
+	else if (fraction >= 43)
+	{
+		grade = 5;
+		return grade;
+	}
+
+	else if (fraction >= 37)
+	{
+		grade = 4;
+		return grade;
+	}
+
+	else if (fraction >= 29)
+	{
+		grade = 3;
+		return grade;
+	}
+
+	else if (fraction >= 19)
+	{
+		grade = 2;
+		return grade;
+	}
+
+	else 
+	{
+		grade = 1;
+		return grade;
+	}
+}
+
+inline void Student::ShowUserGrade()
+{
+	int gotx = 6;
+	string path = this->GetUsersFolder() + "/" + this->GetLogin() + "/" + "successful_test.txt";
+	string mesg;
+	ifstream test(path);	
+	system("cls");
+
+	gotx++;
+	try
+	{
+		//проверяем есть ли пользовательский файл с пройденными тестами
+		bool ckfile = test.is_open();
+		test.close();
+
+		if (ckfile)
+		{
+			gotoxy(25, ++gotx);
+			cout << "Вы полностью сдали следующие тесты: ";
+			test.open(path);
+			while (!test.eof())
+			{
+				mesg = "";
+
+				getline(test, mesg);
+
+				gotoxy(25, ++gotx);
+				cout << mesg;
+			}
+			test.close();
+		}
+
+		else
+		{
+			gotoxy(25, ++gotx);
+			cout << "У вас нет полностью завершенных тестов. ";
+		}			
+	}
+
+	catch (...)
+	{
+		gotoxy(25, ++gotx);
+		cout << "Ошибка в Student::ShowUserGrade()";
+	}
+}
+
 const string currentDateTime() {
 	time_t     now = time(0);
 	struct tm  tstruct;
 	char       buf[80];
 	tstruct = *localtime(&now);
 	strftime(buf, sizeof(buf), "%Y-%m-%d_%H.%M.%S", &tstruct);
-
 	return buf;
 }

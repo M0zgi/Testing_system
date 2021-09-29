@@ -27,8 +27,7 @@ bool CheckAdmin()
 	}
 
 	catch (ExceptionAdmin& ex)
-	{
-		
+	{		
 		gotoxy(25, 7);
 		cout << ex.what() << "Код ошибки: " << ex.GetError() << "\n";
 		gotoxy(25, 8);
@@ -65,8 +64,8 @@ void MenuFun20(); //  пункт меню входа пользователя в
 void MenuFun21(); // пункт меню регистрации пользователя в системе
 
 void StudentFun1(); //#1. Сдать новое тестирование.";
-void StudentFun2();
-void StudentFun3();
+void StudentFun2(); //#2. Продолжить тестирование
+void StudentFun3(); //#3 Просмотреть список пройденных тестов
 
 void ExitOption(); // элемент выхода
 
@@ -555,6 +554,10 @@ void StudentFun3() //
 
 	gotoxy(0, 0);
 	cout << "Пользователь: " << userName->GetUser() << " (" << userName->GetFIO() << ")";;
+
+	unique_ptr<Student> student(new Student);
+	student->SetLogin(userName->GetUser());
+	student->ShowUserGrade();
 
 	gotoxy(25, 7);
 
