@@ -210,7 +210,7 @@ string User::UserSignIn()
 		{
 			gotoxy(25, ++gotx);
 			cout << "Ошибка входа";
-			return this->login;
+			return "Зарегистрируйтесь, или войдите";
 		}	
 	}
 
@@ -1233,8 +1233,10 @@ inline void Admin::AddTests()
 				else
 				{
 					map <string, string> map_test;
-					count = 0;
 
+					system("cls");
+					count = 0;
+					gotx = 6;
 					while (!ifs.eof())
 					{
 						getline(ifs, key);
@@ -1248,8 +1250,9 @@ inline void Admin::AddTests()
 
 					ifs.close();
 
+					gotx++;
 					gotoxy(25, ++gotx);
-					cout << "В этой категории есть следующие тесты";
+					cout << "В категории " << mp[keyedit] << " есть следующие тесты: ";
 
 
 					for (auto it = map_test.begin(); it != map_test.end(); ++it)
@@ -1258,6 +1261,7 @@ inline void Admin::AddTests()
 						cout << it->first << ". " << it->second << "\n";
 					}
 
+					gotx++;
 					gotoxy(25, ++gotx);
 					cout << "Введите номер Теста для создания к нему вопросов: ";
 					getline(cin, keyedit);
@@ -1276,13 +1280,20 @@ inline void Admin::AddTests()
 						map<int, string> manswer;
 
 						system("cls");
-
+						gotx = 6;
 						ifs.open(path);
 
 						if (!ifs.is_open())
 						{
 							gotoxy(25, ++gotx);
-							cout << "В системе еще нет тестов в разделе: " << it->second << " -> " << it_test->second;
+							cout << "В системе еще нет тестов в разделе: ";
+							SetColor(14, Black);
+							cout << it->second;
+							SetColor(15, Black);
+							cout << " -> ";
+							SetColor(11, Black);
+							cout << it_test->second;
+							SetColor(15, Black);
 						}
 
 						else
@@ -1295,20 +1306,81 @@ inline void Admin::AddTests()
 								delete[] buff;
 							}
 							gotoxy(25, ++gotx);
-							cout << "В системе есть " << count << " вопросов в разделе " << it->second;
+							cout << "В системе есть "; 
+							SetColor(3, Black);
+							cout << count;
+							SetColor(15, Black);
+							cout << " вопроса(ов) в разделе ";
+							SetColor(14, Black);
+							cout << it->second;
+							SetColor(15, Black);
+							cout << " -> ";
+							SetColor(11, Black);
+							cout << it_test->second;
+							SetColor(15, Black);
+							
 							count++;
+							
+							ifstream intest;
+							intest.exceptions(ofstream::badbit | ofstream::failbit);
+							int file_line = -1;
+							string path_helper;
+							string question_test;
+
+							for (size_t i = 1; i < count; i++)
+							{		
+								
+								path_helper = this->GetTestFolder() + "/" + it->second + "/" + it_test->second + "/" + to_string(i) + ".txt";
+								
+								try
+								{
+									intest.open(path_helper);
+									
+									for (size_t k = 0; k < 2; k++)
+									{
+										getline(intest, question_test);
+
+										if (!file_line)
+										{
+											gotoxy(25, ++gotx);
+											cout << i << ". " << question_test << "\n";
+											file_line = -2;
+										}
+										file_line++;
+									}
+
+									intest.close();
+									
+								}
+								catch (const ifstream::failure& ex)
+								{
+									gotoxy(25, ++gotx);
+									cout << ex.what() << "\nКод ошибки: " << ex.code() << "\n";
+									gotoxy(25, ++gotx);
+									system("pause");
+								}
+
+							}
+
+							
 						}
 
 						ifs.close();
 
 						gotoxy(25, ++gotx);
 						cout << "Добавление теста в раздел: ";
-						cout << it->first << ". " << it->second << " -> " << it_test->second;
+						SetColor(14, Black);
+						cout << it->second;
+						SetColor(15, Black);
+						cout << " -> ";
+						SetColor(11, Black);
+						cout << it_test->second;
+						SetColor(15, Black);
 					
 						gotoxy(25, ++gotx);
 						cout << "Введите вопрос: ";
 						getline(cin, question);
-
+												
 						q_key = count;
 						mquestion.emplace(q_key, question);
 						int n;
@@ -1356,7 +1428,13 @@ inline void Admin::AddTests()
 
 						gotoxy(25, ++gotx);
 						cout << "Изменение данных завершено.";
-					}					
+					}
+
+					else
+					{
+						gotoxy(25, ++gotx);
+						cout << "Вы ввели неверный номер теста";
+					}
 				}
 			}						
 
@@ -1478,12 +1556,14 @@ void Student::Registration()
 
 		else
 		{
-			throw ExceptionUser("Пользователь с таким логином существует. Войдите в систему используя указанный логин. \nИли пройдите регистрацию используя другой логин (e-mail)" , 3);
+			throw ExceptionUser("\nПользователь с таким логином существует. Войдите в систему используя указанный логин. \nИли пройдите регистрацию используя другой логин (e-mail)" , 3);
 		}
 	}
 
 	catch (const ofstream::failure& ex)
 	{
+		
+		gotx += 2;
 		gotoxy(25, ++gotx);
 		cout << ex.what() << " Код ошибки: " << ex.code() << "\n";
 		system("pause");
@@ -1491,9 +1571,10 @@ void Student::Registration()
 
 	catch (ExceptionUser& ex)
 	{
+		
 		gotoxy(25, ++gotx);
 		cout << ex.what() << " Код ошибки: " << ex.GetError() << "\n";
-		
+		gotx += 2;
 		gotoxy(25, ++gotx);
 		system("pause");
 	}
@@ -1575,6 +1656,8 @@ inline void Student::NewTest()
 			
 			count = 1;
 
+			string category_name = it->second; //сохраняем текущее название категорииж
+
 			mp.clear(); //очищаем map с категориями разделов, и заполняем его названиями существующих тестов
 
 			ifs.open(path);
@@ -1624,6 +1707,10 @@ inline void Student::NewTest()
 
 					else
 					{
+						system("cls");
+
+						gotx = 6;
+
 						while (!ifn.eof())
 						{
 							char* buff = new char[5];
@@ -1632,86 +1719,41 @@ inline void Student::NewTest()
 							delete[] buff;
 						}
 						gotoxy(25, ++gotx);
-						cout << "Во время тестирования вам нужно будет ответить на " << n << " вопроса(ов) в выбранной категории " << it->second;
-					}
+						cout << "Вы выбрали тест из раздела ";
+						SetColor(14, Black);
+						cout << category_name;
+						SetColor(15, Black);
+						cout << " -> ";
+						SetColor(11, Black);
+						cout << it->second << "\n";
+						SetColor(15, Black);
+						gotoxy(25, ++gotx);
+						cout << "Во время тестирования вам нужно будет ответить на ";						
+					    SetColor(3, Black);
+						cout << n;
+						SetColor(15, Black);
+						cout << " вопроса(ов)";
+						gotx+=2;
 
-					ifn.close();
-					
-					string questions, answer, path_helper;
-					path_helper = path_questions += "/" + it->second;
-
-					string test_time = currentDateTime();
-
-					//сохранение в файл кол-во пройденных ответов по конкретному тесту
-					string path_users_test = this->GetUsersFolder() + "/" + this->login + "/" + it->second + " (" + test_time + ")" + ".txt";
-					
-					//сохранение в файл названий запущеных тестов студентом
-					string path_users_name_test = this->GetUsersFolder() + "/" + this->login + "/" + "student_name_tests.txt";
-
-					int un; // номер ответа на вопрос теста введенного пользователем
-					int ball_count = 0; // подсчет правильных ответов
-					int test_count = 0; // подсчет кол-ва пройденных ответов на выбранный тест
-
-					ofstream users_name_test;
-					users_name_test.exceptions(ofstream::badbit | ofstream::failbit);
-					try
-					{
-						users_name_test.open(path_users_test);
-
-						users_name_test << test_count;
-
-						users_name_test.close();
-
-					}
-					catch (const ofstream::failure& ex)
-					{
-						gotoxy(25, 4);
-						cout << ex.what() << "\nКод ошибки: " << ex.code() << "\n";
-						system("pause");
-					}
-
-					ofstream out_test_count;
-					out_test_count.exceptions(ofstream::badbit | ofstream::failbit);
-
-					try
-					{
-						out_test_count.open(path_users_name_test, ofstream::app);
-						out_test_count << it->second + " (" + test_time + ")" << "\n";
-						out_test_count.close();
-					}
-					catch (const ofstream::failure& ex)
-					{
-						gotoxy(25, 4);
-						cout << ex.what() << "\nКод ошибки: " << ex.code() << "\n";
-						system("pause");
-					}
-
-					for (size_t i = 1; i < n + 1; i++)
-					{		
-						cout << "Вопрос № " << i << ".\n";
-						
-						path_questions = path_helper + "/" + to_string(i) + ".txt";
-
-						ifn.open(path_questions);
-
-						getline(ifn, answer);
-
-						while (!ifn.eof())
-						{ 
-							questions = "";
-							getline(ifn, questions);
-							cout << questions << "\n";
-						}
 						ifn.close();
 
-						cout << "Вопрос № " << i << ". Введите номер ответа: ";
-						cin >> un;
+						string questions, answer, path_helper;
+						path_helper = path_questions += "/" + it->second;
 
-						if (to_string(un) == answer)
-							ball_count++;
+						string test_time = currentDateTime();
 
-						test_count++;
+						//сохранение в файл кол-во пройденных ответов по конкретному тесту
+						string path_users_test = this->GetUsersFolder() + "/" + this->login + "/" + it->second + " (" + test_time + ")" + ".txt";
 
+						//сохранение в файл названий запущеных тестов студентом
+						string path_users_name_test = this->GetUsersFolder() + "/" + this->login + "/" + "student_name_tests.txt";
+
+						int un; // номер ответа на вопрос теста введенного пользователем
+						int ball_count = 0; // подсчет правильных ответов
+						int test_count = 0; // подсчет кол-ва пройденных ответов на выбранный тест
+
+						ofstream users_name_test;
+						users_name_test.exceptions(ofstream::badbit | ofstream::failbit);
 						try
 						{
 							users_name_test.open(path_users_test);
@@ -1727,11 +1769,72 @@ inline void Student::NewTest()
 							cout << ex.what() << "\nКод ошибки: " << ex.code() << "\n";
 							system("pause");
 						}
-					}			
-					
+
+						ofstream out_test_count;
+						out_test_count.exceptions(ofstream::badbit | ofstream::failbit);
+
+						try
+						{
+							out_test_count.open(path_users_name_test, ofstream::app);
+							out_test_count << it->second + " (" + test_time + ")" << "\n";
+							out_test_count.close();
+						}
+						catch (const ofstream::failure& ex)
+						{
+							gotoxy(25, 4);
+							cout << ex.what() << "\nКод ошибки: " << ex.code() << "\n";
+							system("pause");
+						}
+
+						for (size_t i = 1; i < n + 1; i++)
+						{
+							gotoxy(25, ++gotx);
+							cout << "Вопрос № " << i << ".\n";
+
+							path_questions = path_helper + "/" + to_string(i) + ".txt";
+
+							ifn.open(path_questions);
+
+							getline(ifn, answer);
+
+							while (!ifn.eof())
+							{
+								questions = "";
+								getline(ifn, questions);
+								gotoxy(25, ++gotx);
+								cout << questions << "\n";
+							}
+							ifn.close();
+							gotoxy(25, ++gotx);
+							cout << "Вопрос № " << i << ". Введите номер ответа: ";
+							cin >> un;
+							gotx++;
+							if (to_string(un) == answer)
+								ball_count++;
+
+							test_count++;
+
+							try
+							{
+								users_name_test.open(path_users_test);
+
+								users_name_test << test_count;
+
+								users_name_test.close();
+
+							}
+							catch (const ofstream::failure& ex)
+							{
+								gotoxy(25, ++gotx);
+								cout << ex.what() << "\nКод ошибки: " << ex.code() << "\n";
+								system("pause");
+							}
+						}
+
+					}
 				}
-			}
-			ifs.close();			
+				ifs.close();
+			}						
 			
 			if (!mp.size())
 			{
