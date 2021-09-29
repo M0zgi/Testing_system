@@ -5,6 +5,8 @@
 #include <exception>
 #include<map>
 #include <experimental/filesystem>
+#include <ctime>
+#include<windows.h>
 //#include <filesystem>
 
 #include"MyExceptions.h"
@@ -18,6 +20,41 @@ using namespace std;
 namespace fs = std::experimental::filesystem;
 
 void gotoxy(int, int);
+const string currentDateTime();
+
+enum ConsoleColor
+{
+	Black = 0,
+	Blue = 1,
+	Green = 2,
+	Cyan = 3,
+	Red = 4,
+	Magenta = 5,
+	Brown = 6,
+	LightGray = 7,
+	DarkGray = 8,
+	LightBlue = 9,
+	LightGreen = 10,
+	LightCyan = 11,
+	LightRed = 12,
+	LightMagenta = 13,
+	Yellow = 14,
+	White = 15
+};
+
+
+
+HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+
+void SetColor(int text, int background)
+{	
+	SetConsoleTextAttribute(hStdOut, (WORD)((background << 4) | text));
+}
+
+void SetColor(int text, ConsoleColor background)
+{	
+	SetConsoleTextAttribute(hStdOut, (WORD)((background << 4) | text));
+}
 
 class User
 {
@@ -28,21 +65,32 @@ public:
 	
 	virtual void Registration() = 0;
 	
+	void SetLogin(string login) { this->login = login; }
+
 	string GetLogin() { return this->login; }
 	string GetUserLogins() { return this->folder; } //геттер папки для хранения регистрационных данных пользователей
 	string UserSignIn();
 	string GetUsersFolder() { return this->UsersFolder; }
 	string GetUsersInfo() { return this->usersinfo; }
-	
+	string GetTestFolder() { return TestFolder; }
+	string GetTestsName() { return TestsName; }
+	string GetCategoriesFile() { return CategoriesFile; }
+	string GetStudentsFile() { return StudentsFile; }
+
 	~User() {};
 
 protected:
+
 
 	string login;
 	string pass;
 	string usersinfo = "UsersInfo.txt";
 	string UsersFolder = "UsersFolder"; // папка для хранения реузльтатов тестирования студентов
 	static string folder; //имя папки для сохранения регистрационных данных студентов
+	string TestFolder = "TestFolder"; // папка для хранения вопросов тестирования
+	string TestsName = "TestsName.txt"; // файл в котором хранятся названия тестов в категории
+	string CategoriesFile = "CategoriesFile.txt"; // файл в котором хранятся категории с тестами
+	string StudentsFile = "StudentsFile.txt"; // файл в котором хранятся логины и ФИО студентов	
 };
 
 string User::folder = "StudentLogin";
@@ -55,10 +103,7 @@ public:
 
 	string GetFilename() { return filename; } //геттер названия файла с логином и паролем администратора системы
 	
-	string GetStudentsFile() { return StudentsFile; }
-	string GetTestFolder() { return TestFolder; }
-	string GetCategoriesFile() { return CategoriesFile; }
-	string GetTestsName() { return TestsName; }
+	
 
 	void ChangeLogin(); //изменение логина и пароля администратора  системы
 	void DeleteUser();//удаление пользовтаеля
@@ -78,10 +123,6 @@ public:
 private:	
 	static string filename;
 	
-	string StudentsFile = "StudentsFile.txt"; // файл в котором хранятся логины и ФИО студентов
-	string TestFolder = "TestFolder"; // папка для хранения вопросов тестирования
-	string CategoriesFile = "CategoriesFile.txt"; // файл в котором хранятся категории с тестами
-	string TestsName = "TestsName.txt"; // файл в котором хранятся названия тестов в категории
 };
 
 string Admin::filename = "admin.txt";
@@ -107,24 +148,25 @@ private:
 string User::UserSignIn()
 {
 	cout << "Вход в систему\n";
-	unique_ptr<Student> student(new Student);
+	//unique_ptr<Student> student(new Student);
 
-	gotoxy(25, 7);
+	int gotx = 6;
+	gotoxy(25, ++gotx);
 	cout << "Введите логин (e-mail): ";
-	cin >> student->login;	
+	cin >> this->login;	
 
 	unique_ptr<Admin> ad(new Admin);
 
 	string path = ad->GetFilename();
 
-	if (student->login + ".txt" == path)
+	if (this->login + ".txt" == path)
 	{
 		system("cls");
-		gotoxy(25, 7);
+		gotoxy(25, ++gotx);
 		cout << "Введите логин (e-mail) администратора системы: ";
 		string adminlogin, md5adminlogin;
 		cin >> ad->login;
-		gotoxy(25, 8);
+		gotoxy(25, ++gotx);
 		cout << "Введите пароль администратора системы: ";
 		string adminpass, md5adminpass;
 		cin >> ad->pass;
@@ -154,7 +196,7 @@ string User::UserSignIn()
 		}
 		catch (const ifstream::failure& ex)
 		{
-			gotoxy(25, 10);
+			gotoxy(25, ++gotx);
 			cout << ex.what() << " Код ошибки: " << ex.code() << "\n";
 			system("pause");
 		}
@@ -166,7 +208,7 @@ string User::UserSignIn()
 
 		else
 		{
-			gotoxy(25, 11);
+			gotoxy(25, ++gotx);
 			cout << "Ошибка входа";
 			return this->login;
 		}	
@@ -174,7 +216,7 @@ string User::UserSignIn()
 
 	else 
 	{		
-		path = student->folder + "/" + md5(student->login) + ".txt";
+		path = this->folder + "/" + md5(this->login) + ".txt";
 
 		try
 		{
@@ -184,11 +226,12 @@ string User::UserSignIn()
 		catch (...)
 		{			
 			
-			gotoxy(25, 8);
+			gotoxy(25, ++gotx);
 			cout << "Пользователь с таким логином не найден.";
-			gotoxy(25, 10);
+			gotoxy(25, ++gotx);
 			system("pause");
-			return this->login;
+			//return this->login;
+			return "Зарегистрируйтесь, или войдите";
 		}
 
 		ifstream ufin(path);
@@ -205,12 +248,12 @@ string User::UserSignIn()
 			//проверяем есть ли пользователь с таким логином
 			if (ckfile)
 			{				
-				gotoxy(25, 8); 
+				gotoxy(25, ++gotx);
 				cout << "Введите пароль: ";
 				string userpass, md5userpass;
-				cin >> student->pass;
+				cin >> this->pass;
 
-				md5userpass = md5(student->pass);
+				md5userpass = md5(this->pass);
 
 				int count = -2;
 				while (count)
@@ -221,45 +264,46 @@ string User::UserSignIn()
 
 				if (md5userpass == userpass)
 				{
-					gotoxy(25, 13);
+					gotoxy(25, ++gotx);
 					cout << "Вы успешно вошли в систему тестирования." << endl;
-					gotoxy(25, 14);
+					gotoxy(25, ++gotx);
 					system("pause");
 					cin.ignore();
 					ufin.close();
-					return student->GetLogin();
+					return this->GetLogin();
 				}
 
 				else
 				{
 					throw ExceptionUser("Вы ввели неверный пароль пользователя", 4);
-					return this->login;
+					//return this->login;
 				}				
 			}
 		}
 
 		catch (const ofstream::failure& ex)
 		{
-			gotoxy(25, 9);
+			gotoxy(25, ++gotx);
 			cout << ex.what() << " Код ошибки: " << ex.code() << "\n";
-			gotoxy(25, 10);
+			gotoxy(25, ++gotx);
 			system("pause");
 		}
 
 		catch (ExceptionUser& ex)
 		{
-			gotoxy(25, 9);
+			gotoxy(25, ++gotx);
 			cout << ex.what() << " Код ошибки: " << ex.GetError() << "\n";
-			gotoxy(25, 10);
+			gotoxy(25, ++gotx);
 			system("pause");
 			
+			return "Зарегистрируйтесь, или войдите";
 		}
 
 		catch (...)
 		{
-			gotoxy(25, 9);
+			gotoxy(25, ++gotx);
 			cout << "Ошибка в string User::UserSignIn()";
-			gotoxy(25, 10);
+			gotoxy(25, ++gotx);
 			system("pause");
 		}
 		
@@ -270,8 +314,10 @@ string User::UserSignIn()
 
 inline void Admin::Registration()
 {		
-	gotoxy(25, 11);
-	cout << "Регистрация администратора системы тестирования\n";	
+
+	int gotx = 10;
+	gotoxy(25, ++gotx);
+	cout << "Регистрация администратора системы тестирования";	
 
 	ofstream fout;
 	fout.exceptions(ofstream::badbit | ofstream::failbit);
@@ -280,86 +326,103 @@ inline void Admin::Registration()
 	{
 		string path = Admin::filename;
 
-		fout.open(path);
 		
-		gotoxy(25, 12);
-		cout << "Логин администратора: admin";
+		
+		gotoxy(25, ++gotx);
+		cout << "Логин администратора:";
+		SetColor(Red, Black); 
+		cout<< "admin";
+		SetColor(15, Black);
 		string login = "admin";
 		//cin >> login;
 		string md5login;
 		md5login = md5(login);
-		fout << md5login << "\n";
-		gotoxy(25, 13);
+		
+		gotoxy(25, ++gotx);
 		cout << "Введите пароль администратора: ";
 		string pass;
 		cin >> pass;
 		string md5pass;
 		md5pass = md5(pass);
+		
+		fout.open(path);
+		fout << md5login << "\n";
 		fout << md5pass;
-
 		fout.close();		
 	}
 
 	catch (const ifstream::failure& ex)
 	{		
-		gotoxy(25, 14);
+		gotoxy(25, ++gotx);
 		cout << ex.what() << " Код ошибки: " << ex.code()<< "\n";
 		system("pause");
 	}
 
 	catch (...)
 	{
-		gotoxy(25, 14);
+		gotoxy(25, ++gotx);
 		cout << "Catch Admin::RegistrationAdmin()\n";
 	}
+
+	gotx++;
+	gotoxy(25, ++gotx);
+	cout << "Администратор успешно зарегистрирован. Можете войти в систему с веденными данными";
+	gotx++;
+	gotoxy(25, ++gotx);
+	system("pause");
 }
 
 inline void Admin::ChangeLogin()
 {
+	int gotx = 6;
+	
 	ofstream fout;
 	fout.exceptions(ofstream::badbit | ofstream::failbit);
 
 	try
 	{		
-		gotoxy(25, 7);
+		gotoxy(25, ++gotx);
 		cout << "Изменение логина и пароля администратора системы тестирования\n";
-		string path = Admin::filename;
+		string path = Admin::filename;		
 
-		fout.open(path);
-
-		gotoxy(25, 8);
+		gotoxy(25, ++gotx);
 		cout << "Введите новый логин администратора: ";
 		string login;
 		cin >> login;
 		string md5login;
 		md5login = md5(login);
-		fout << md5login << "\n";
-		gotoxy(25, 9);
+		
+		gotoxy(25, ++gotx);
 		cout << "Введите новый пароль администратора: ";
 		string pass;
 		cin >> pass;
 		string md5pass;
 		md5pass = md5(pass);
+		
+		//сохраняем в файл введенный логи и пароль
+		fout.open(path);
+		fout << md5login << "\n";
 		fout << md5pass;
-
-		gotoxy(25, 10);
-		cout << "Операция успешна." << endl;
-		gotoxy(25, 11);
-		system("pause");
 		fout.close();
+
+		gotoxy(25, ++gotx);
+		cout << "Операция успешна." << endl;
+		gotoxy(25, ++gotx);
+		system("pause");
+		
 	}
 
 	catch (const ifstream::failure& ex)
 	{
-		gotoxy(25, 12);
+		gotoxy(25, ++gotx);
 		cout << ex.what() << " Код ошибки: " << ex.code() << "\n";
-		gotoxy(25, 13);
+		gotoxy(25, ++gotx);
 		system("pause");
 	}
 
 	catch (...)
 	{
-		gotoxy(25, 12);
+		gotoxy(25, ++gotx);
 		cout << "Catch Admin::ChangeLogin()\n";
 	}
 }
@@ -812,9 +875,9 @@ inline void Admin::AddCategories()
 {
 	system("cls");	
 	int gotx = 6;
-	unique_ptr<Admin> admin(new Admin);
+	//unique_ptr<Admin> admin(new Admin);
 	map <string, string> mp;
-	string path = admin->GetTestFolder() + "/" + admin->GetCategoriesFile();
+	string path = this->GetTestFolder() + "/" + this->GetCategoriesFile();
 	string key, category;
 
 	int count = 0; // счетчик кол-ва разделов
@@ -827,7 +890,7 @@ inline void Admin::AddCategories()
 
 		if (!ifs.is_open())
 		{
-			gotoxy(25, gotx);
+			gotoxy(25, ++gotx);
 			cout << "В системе еще нет созданных разделов тестирвоания\n";
 		}
 
@@ -882,9 +945,9 @@ inline void Admin::EditCategories()
 {	
 	system("cls");
 	int gotx = 6;
-	unique_ptr<Admin> admin(new Admin);
+	//unique_ptr<Admin> admin(new Admin);
 	map <string, string> mp;
-	string path = admin->GetTestFolder() + "/" + admin->GetCategoriesFile();
+	string path = this->GetTestFolder() + "/" + this->GetCategoriesFile();
 	string key, category;
 
 	int count = 0; // счетчик кол-ва разделов
@@ -897,7 +960,7 @@ inline void Admin::EditCategories()
 
 		if (!ifs.is_open())
 		{
-			gotoxy(25, gotx);
+			gotoxy(25, ++gotx);
 			cout << "В системе еще нет созданных разделов тестирования\n";
 		}
 
@@ -979,9 +1042,9 @@ inline void Admin::AddTestsName()
 	
 	system("cls");
 	int gotx = 6;
-	unique_ptr<Admin> admin(new Admin);
+	//unique_ptr<Admin> admin(new Admin);
 	map <string, string> mp;
-	string path = admin->GetTestFolder() + "/" + admin->GetCategoriesFile();
+	string path = this->GetTestFolder() + "/" + this->GetCategoriesFile();
 	string key, category;
 
 	int count = 0; // счетчик кол-ва разделов
@@ -994,9 +1057,9 @@ inline void Admin::AddTestsName()
 
 		if (!ifs.is_open())
 		{
-			gotoxy(25, gotx);
+			gotoxy(25, ++gotx);
 			cout << "В системе еще нет созданных разделов тестирования";
-			gotoxy(25, gotx);
+			gotoxy(25, ++gotx);
 			cout << "Для создания тестов создайте хотя бы один раздел тестирования";
 		}
 
@@ -1039,9 +1102,9 @@ inline void Admin::AddTestsName()
 				string testname;
 				getline(cin, testname);
 
-				fs::create_directories(admin->GetTestFolder() + "/" + it->second + "/" + testname);
+				fs::create_directories(this->GetTestFolder() + "/" + it->second + "/" + testname);
 
-				path = admin->GetTestFolder() + "/" + it->second + "/" + admin->GetTestsName();
+				path = this->GetTestFolder() + "/" + it->second + "/" + this->GetTestsName();
 
 				count = 1;
 
@@ -1090,9 +1153,9 @@ inline void Admin::AddTests()
 {
 	system("cls");
 	int gotx = 6;
-	unique_ptr<Admin> admin(new Admin);
+	//unique_ptr<Admin> admin(new Admin);
 	map <string, string> mp;
-	string path = admin->GetTestFolder() + "/" + admin->GetCategoriesFile();
+	string path = this->GetTestFolder() + "/" + this->GetCategoriesFile();
 	string key, category, folder;
 
 	int count = 0; // счетчик кол-ва разделов
@@ -1105,7 +1168,7 @@ inline void Admin::AddTests()
 
 		if (!ifs.is_open())
 		{
-			gotoxy(25, gotx);
+			gotoxy(25, ++gotx);
 			cout << "В системе еще нет созданных разделов тестирования";
 		}
 
@@ -1146,9 +1209,9 @@ inline void Admin::AddTests()
 
 			if (it != mp.end())
 			{
-				fs::create_directories(admin->GetTestFolder() + "/" + it->second);
+				fs::create_directories(this->GetTestFolder() + "/" + it->second);
 
-				path = admin->GetTestFolder() + "/" + it->second + "/" + admin->GetTestsName();
+				path = this->GetTestFolder() + "/" + it->second + "/" + this->GetTestsName();
 
 				ifs.open(path);
 
@@ -1163,7 +1226,7 @@ inline void Admin::AddTests()
 
 					if (answ)
 					{
-						admin->AddTestsName();
+						this->AddTestsName();
 					}
 				}
 
@@ -1203,7 +1266,7 @@ inline void Admin::AddTests()
 
 					if (it_test != map_test.end())
 					{
-						path = admin->GetTestFolder() + "/" + it->second + "/" + it_test->second + "/" + "quantity.txt"; // количество вопросов в тесте
+						path = this->GetTestFolder() + "/" + it->second + "/" + it_test->second + "/" + "quantity.txt"; // количество вопросов в тесте
 					
 						count = 1;
 						int q_key = 0, a_key = 0;
@@ -1218,7 +1281,7 @@ inline void Admin::AddTests()
 
 						if (!ifs.is_open())
 						{
-							gotoxy(25, gotx);
+							gotoxy(25, ++gotx);
 							cout << "В системе еще нет тестов в разделе: " << it->second << " -> " << it_test->second;
 						}
 
@@ -1275,7 +1338,7 @@ inline void Admin::AddTests()
 						ofs.open(path);
 						ofs << q_key;
 						ofs.close();
-						path = admin->GetTestFolder() + "/" + it->second + "/" + it_test->second + "/" + to_string(q_key) + ".txt";
+						path = this->GetTestFolder() + "/" + it->second + "/" + it_test->second + "/" + to_string(q_key) + ".txt";
 						ofs.open(path);
 						ofs << n << "\n";
 
@@ -1317,10 +1380,12 @@ inline void Admin::AddTests()
 void Student::Registration()
 {	
 	system("cls");
-	gotoxy(25, 7);
+	
+	int gotx = 6;
+	gotoxy(25, ++gotx);
 	cout << "Регистрация студента\n";
 
-	gotoxy(25, 8);
+	gotoxy(25, ++gotx);
 	cout << "Введите логин (e-mail): ";
 	cin >> this->login;
 
@@ -1357,7 +1422,7 @@ void Student::Registration()
 			afout.exceptions(ofstream::badbit | ofstream::failbit);
 			ufout.exceptions(ofstream::badbit | ofstream::failbit);
 
-			path = admin->GetUsersFolder() + "/" + admin->GetStudentsFile();
+			path = this->GetUsersFolder() + "/" + this->GetStudentsFile();
 			
 			sfout.open(this->folder + "/" + md5(this->login) + ".txt");
 			
@@ -1369,7 +1434,7 @@ void Student::Registration()
 			string hash = md5(this->login);
 			sfout << hash << "\n";
 
-			gotoxy(25, 9);
+			gotoxy(25, ++gotx);
 			cout << "Введите пароль: ";
 			string pass;
 			cin >> pass;				
@@ -1377,7 +1442,7 @@ void Student::Registration()
 			hash = md5(pass);
 			sfout << hash << "\n";
 			cin.ignore();
-			gotoxy(25, 10);
+			gotoxy(25, ++gotx);
 			cout << "Введите ФИО: ";
 			string name;
 			getline(cin, name);
@@ -1385,7 +1450,7 @@ void Student::Registration()
 			//ufout << name << "\n";
 			
 
-			gotoxy(25, 11);
+			gotoxy(25, ++gotx);
 			cout << "Введите номер мобильного телефона: +38";
 			string telephone;
 			getline(cin, telephone);
@@ -1394,7 +1459,7 @@ void Student::Registration()
 			afout << telephone << "\n" << name << " (логин: " << this->login << ")" << "\n";
 			afout.close();
 
-			gotoxy(25, 12);
+			gotoxy(25, ++gotx);
 			cout << "Введите домашний адрес: ";
 			string adress;
 			getline(cin, adress);			
@@ -1402,12 +1467,12 @@ void Student::Registration()
 
 			ufout << telephone << "\n" << "ФИО: " << name << ". Домашний адрес: " <<  adress << "\n";
 
-			gotoxy(25, 13);
+			gotoxy(25, ++gotx);
 			cout << "Регистрация завершена." << endl;
 			sfout.close();		
 			ufout.close();
 			fs::create_directories(this->GetUsersFolder() + "/" + this->login);
-			gotoxy(25, 14);
+			gotoxy(25, ++gotx);
 			system("pause");
 		}
 
@@ -1419,23 +1484,23 @@ void Student::Registration()
 
 	catch (const ofstream::failure& ex)
 	{
-		gotoxy(25, 15);
+		gotoxy(25, ++gotx);
 		cout << ex.what() << " Код ошибки: " << ex.code() << "\n";
 		system("pause");
 	}
 
 	catch (ExceptionUser& ex)
 	{
-		gotoxy(25, 11);
+		gotoxy(25, ++gotx);
 		cout << ex.what() << " Код ошибки: " << ex.GetError() << "\n";
 		
-		gotoxy(25, 14);
+		gotoxy(25, ++gotx);
 		system("pause");
 	}
 
 	catch (...)
 	{	
-		gotoxy(25, 15);
+		gotoxy(25, ++gotx);
 		cout << "Ошибка в Student::Registration()";
 		system("pause");
 	}	
@@ -1446,9 +1511,9 @@ inline void Student::NewTest()
 	//system("cls");
 	
 	int gotx = 6;
-	unique_ptr<Admin> admin(new Admin);
+	//unique_ptr<Admin> admin(new Admin);
 	map <string, string> mp;
-	string path = admin->GetTestFolder() + "/" + admin->GetCategoriesFile();
+	string path = this->GetTestFolder() + "/" + this->GetCategoriesFile();
 	string key, category, folder;
 
 	int count = 0; // счетчик кол-ва разделов
@@ -1503,10 +1568,10 @@ inline void Student::NewTest()
 			gotoxy(25, ++gotx);
 
 
-			path = admin->GetTestFolder() + "/" + it->second + "/" + admin->GetTestsName();
+			path = this->GetTestFolder() + "/" + it->second + "/" + this->GetTestsName();
 			
 			string path_questions;
-			string path_quantity = path_questions = admin->GetTestFolder() + "/" + it->second;
+			string path_quantity = path_questions = this->GetTestFolder() + "/" + it->second;
 			
 			count = 1;
 
@@ -1544,8 +1609,6 @@ inline void Student::NewTest()
 
 				if (it != mp.end())
 				{
-					
-
 					path_quantity += "/" + it->second + "/" + "quantity.txt";
 
 					ifstream ifn;
@@ -1573,14 +1636,56 @@ inline void Student::NewTest()
 					}
 
 					ifn.close();
-
 					
 					string questions, answer, path_helper;
 					path_helper = path_questions += "/" + it->second;
-					//int colum = 1;
 
-					//cin.ignore();
+					string test_time = currentDateTime();
+
+					//сохранение в файл кол-во пройденных ответов по конкретному тесту
+					string path_users_test = this->GetUsersFolder() + "/" + this->login + "/" + it->second + " (" + test_time + ")" + ".txt";
 					
+					//сохранение в файл названий запущеных тестов студентом
+					string path_users_name_test = this->GetUsersFolder() + "/" + this->login + "/" + "student_name_tests.txt";
+
+					int un; // номер ответа на вопрос теста введенного пользователем
+					int ball_count = 0; // подсчет правильных ответов
+					int test_count = 0; // подсчет кол-ва пройденных ответов на выбранный тест
+
+					ofstream users_name_test;
+					users_name_test.exceptions(ofstream::badbit | ofstream::failbit);
+					try
+					{
+						users_name_test.open(path_users_test);
+
+						users_name_test << test_count;
+
+						users_name_test.close();
+
+					}
+					catch (const ofstream::failure& ex)
+					{
+						gotoxy(25, 4);
+						cout << ex.what() << "\nКод ошибки: " << ex.code() << "\n";
+						system("pause");
+					}
+
+					ofstream out_test_count;
+					out_test_count.exceptions(ofstream::badbit | ofstream::failbit);
+
+					try
+					{
+						out_test_count.open(path_users_name_test, ofstream::app);
+						out_test_count << it->second + " (" + test_time + ")" << "\n";
+						out_test_count.close();
+					}
+					catch (const ofstream::failure& ex)
+					{
+						gotoxy(25, 4);
+						cout << ex.what() << "\nКод ошибки: " << ex.code() << "\n";
+						system("pause");
+					}
+
 					for (size_t i = 1; i < n + 1; i++)
 					{		
 						cout << "Вопрос № " << i << ".\n";
@@ -1598,8 +1703,32 @@ inline void Student::NewTest()
 							cout << questions << "\n";
 						}
 						ifn.close();
-					}	
 
+						cout << "Вопрос № " << i << ". Введите номер ответа: ";
+						cin >> un;
+
+						if (to_string(un) == answer)
+							ball_count++;
+
+						test_count++;
+
+						try
+						{
+							users_name_test.open(path_users_test);
+
+							users_name_test << test_count;
+
+							users_name_test.close();
+
+						}
+						catch (const ofstream::failure& ex)
+						{
+							gotoxy(25, 4);
+							cout << ex.what() << "\nКод ошибки: " << ex.code() << "\n";
+							system("pause");
+						}
+					}			
+					
 				}
 			}
 			ifs.close();			
@@ -1607,8 +1736,15 @@ inline void Student::NewTest()
 			if (!mp.size())
 			{
 				gotoxy(25, ++gotx);
-				cout << "В выбранной категории еще нет тестов: ";
+				cout << "В выбранной категории еще нет тестов ";
 			}			
+		}
+
+		else
+		{
+			gotx++;
+			gotoxy(25, ++gotx);
+			cout << "Вы указали несуществующий раздел";
 		}
 	}
 
@@ -1622,4 +1758,14 @@ inline void Student::NewTest()
 	
 	gotoxy(25, ++gotx);
 	system("pause");
+}
+
+const string currentDateTime() {
+	time_t     now = time(0);
+	struct tm  tstruct;
+	char       buf[80];
+	tstruct = *localtime(&now);
+	strftime(buf, sizeof(buf), "%Y-%m-%d_%H.%M.%S", &tstruct);
+
+	return buf;
 }

@@ -32,7 +32,9 @@ bool CheckAdmin()
 		gotoxy(25, 7);
 		cout << ex.what() << "Код ошибки: " << ex.GetError() << "\n";
 		gotoxy(25, 8);
+		SetColor(Red, Black);
 		cout << "В системе нет зарегистрированного администратора.\n";
+		SetColor(15, Black);
 		gotoxy(25, 9);
 		cout << "Пройдите регистрацию" << "\n";
 
@@ -107,7 +109,7 @@ public:
 				sfin.close();
 
 			}
-			catch (const ofstream::failure& ex)
+			catch (const ifstream::failure& ex)
 			{
 				gotoxy(25, 13);
 				cout << ex.what() << "\nКод ошибки: " << ex.code() << "\n";
@@ -140,10 +142,7 @@ void UseMenu(string user, int ItemCount)
 	TMenuOption* MenuOption = new TMenuOption[ItemCount];// массив указателей на функции (динамический).
 
 	if (user == "admin")
-	{
-		//userName->SetUser("admin");
-		gotoxy(0, 0);
-		//cout << "Пользователь: " << userName->GetUser();
+	{		
 		MenuOption[0] = AdminFun1; // заполнение массива функциями.
 		MenuOption[1] = AdminFun2;
 		MenuOption[2] = AdminFun3;
@@ -152,18 +151,14 @@ void UseMenu(string user, int ItemCount)
 	}
 
 	else if (user == "sign")
-	{
-		gotoxy(0, 0);
-		//cout << "Пользователь: " << userName->GetUser();
+	{		
 		MenuOption[0] = MenuFun20;
 		MenuOption[1] = MenuFun21;
 		MenuOption[2] = ExitOption;
 	}
 
 	else 
-	{
-		gotoxy(0, 0);
-		//cout << "Пользователь: " << userName->GetUser();
+	{		
 		MenuOption[0] = StudentFun1;
 		MenuOption[1] = StudentFun2;
 	    MenuOption[2] = StudentFun3;
@@ -177,7 +172,7 @@ void UseMenu(string user, int ItemCount)
 		for (int i = 0; i < ItemCount; i++) // вывод Меню.
 		{
 			
-			gotoxy(25, 7 + i);
+			gotoxy(23, 7 + i);
 			MenuChoice == i + 1 ? cout << " -> " : cout << "    ";
 
 			cout << MenuItems(user)[i] << endl; // вывод названий Меню
@@ -510,7 +505,7 @@ void MenuFun21() // регистрация пользователя
 	unique_ptr<Student> st(new Student);
 	st->Registration();
 
-	_getch();
+	//_getch();
 	system("cls");
 }
 
@@ -525,6 +520,7 @@ void StudentFun1() // регистрация пользователя
 	cout << "Пользователь: " << userName->GetUser() << " (" << userName->GetFIO() << ")";
 
 	unique_ptr<Student> student(new Student);
+	student->SetLogin(userName->GetUser());
 
 	student->NewTest();
 
