@@ -1048,12 +1048,10 @@ inline void Admin::AddTestsName()
 {	
 	system("cls");
 	int gotx = 6;
-	//unique_ptr<Admin> admin(new Admin);
 	map <string, string> mp;
 	string path = this->GetTestFolder() + "/" + this->GetCategoriesFile();
 	string key, category;
 
-	
 	int count = 0; // счетчик кол-ва разделов
 
 	ifstream ifs;
@@ -1177,9 +1175,7 @@ inline void Admin::AddTestsName()
 				gotoxy(25, ++gotx);
 				system("pause");
 			}
-		}	
-
-		
+		}			
 	}
 	catch (...)
 	{
@@ -1228,7 +1224,6 @@ inline void Admin::AddTests()
 			int colortext;
 			for (auto it = mp.begin(); it != mp.end(); ++it)
 			{
-
 				colortext = rand() % 17 - 2;
 				SetColor(colortext, Black);
 				gotoxy(25, ++gotx);
@@ -1291,7 +1286,6 @@ inline void Admin::AddTests()
 					else
 					{						
 						map <string, string> map_test;
-
 						system("cls");
 						count = 0;
 						gotx = 6;
@@ -1311,12 +1305,10 @@ inline void Admin::AddTests()
 						gotx++;
 						gotoxy(25, ++gotx);
 						cout << "В категории ";
-
 						SetColor(14, Black);
 						cout << mp[keyedit];
 						SetColor(15, Black);
 						cout << " есть следующие тесты: ";
-
 
 						for (auto it = map_test.begin(); it != map_test.end(); ++it)
 						{
@@ -1370,9 +1362,9 @@ inline void Admin::AddTests()
 									char* buff = new char[5];
 									ifs.getline(buff, 5);
 									count = atoi(buff);
-									delete[] buff;
-									
+									delete[] buff;									
 								}
+
 								ifs.close();
 								gotoxy(25, ++gotx);
 								cout << "В системе есть ";
@@ -1398,7 +1390,6 @@ inline void Admin::AddTests()
 
 								for (size_t i = 1; i < count; i++)
 								{
-
 									path_helper = this->GetTestFolder() + "/" + it->second + "/" + it_test->second + "/" + to_string(i) + ".txt";
 
 									try
@@ -1419,7 +1410,6 @@ inline void Admin::AddTests()
 										}
 
 										intest.close();
-
 									}
 									catch (const ifstream::failure& ex)
 									{
@@ -1428,13 +1418,8 @@ inline void Admin::AddTests()
 										gotoxy(25, ++gotx);
 										system("pause");
 									}
-
 								}
-
-
-							}
-
-							//ifs.close();
+							}							
 
 							gotoxy(25, ++gotx);
 							cout << "Добавление теста в раздел: ";
@@ -1512,8 +1497,7 @@ inline void Admin::AddTests()
 					gotoxy(25, ++gotx);
 					cout << "Вы ввели неверный номер раздела";
 				}
-			}
-						
+			}						
 		}
 	}
 
@@ -1707,13 +1691,12 @@ inline void Student::NewTest()
 		cout << "Введите номер категории для выбора теста: ";
 		string keyedit;
 		getline(cin, keyedit);
-		
+
 		auto it = mp.find(keyedit);
 
 		if (it != mp.end())
 		{
 			gotoxy(25, ++gotx);
-
 
 			path = this->GetTestFolder() + "/" + it->second + "/" + this->GetTestsName();
 			
@@ -1840,19 +1823,7 @@ inline void Student::NewTest()
 						int test_grade; // итоговая оценка за тест 
 
 						ofstream users_name_test;
-						users_name_test.exceptions(ofstream::badbit | ofstream::failbit);
-					/*	try
-						{
-							users_name_test.open(path_users_test);
-							users_name_test << test_count;
-							users_name_test.close();
-						}
-						catch (const ofstream::failure& ex)
-						{
-							gotoxy(25, 4);
-							cout << ex.what() << "\nКод ошибки: " << ex.code() << "\n";
-							system("pause");
-						}*/
+						users_name_test.exceptions(ofstream::badbit | ofstream::failbit);					
 
 						ofstream out_test_count;
 						out_test_count.exceptions(ofstream::badbit | ofstream::failbit);
@@ -2222,16 +2193,14 @@ inline void Student::ShowUserGrade()
 		else
 		{
 			gotoxy(25, ++gotx);
-			cout << "У вас нет полностью завершенных тестов. ";
-			
+			cout << "У вас нет полностью завершенных тестов. ";			
 		}			
 	}
 
 	catch (...)
 	{
 		gotoxy(25, ++gotx);
-		cout << "Ошибка в Student::ShowUserGrade()";
-		
+		cout << "Ошибка в Student::ShowUserGrade()";		
 	}
 	gotx++;
 	gotoxy(25, ++gotx);
@@ -2367,8 +2336,7 @@ inline void Student::ContinueTest()
 							//left_count = n - test_count;
 
 							for (size_t i = test_count + 1; i < n + 1; i++)
-							{
-								
+							{								
 								try
 								{
 									users_name_test.open(test_path);
@@ -2494,7 +2462,6 @@ inline void Student::ContinueTest()
 									system("pause");
 								}
 							}
-
 						}
 
 						else
@@ -2502,7 +2469,6 @@ inline void Student::ContinueTest()
 							cout << "Не удалось открыть тест.";
 						}
 						ifs.close();
-
 					}
 				}
 
@@ -2510,8 +2476,7 @@ inline void Student::ContinueTest()
 				{
 					gotoxy(25, ++gotx);
 					cout << "Вы всегда можете вернутся в этот раздел и завершить тестирвоание.";
-				}
-				
+				}				
 			}
 		}
 
