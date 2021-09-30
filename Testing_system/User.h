@@ -1841,7 +1841,7 @@ inline void Student::NewTest()
 
 						ofstream users_name_test;
 						users_name_test.exceptions(ofstream::badbit | ofstream::failbit);
-						try
+					/*	try
 						{
 							users_name_test.open(path_users_test);
 							users_name_test << test_count;
@@ -1852,7 +1852,7 @@ inline void Student::NewTest()
 							gotoxy(25, 4);
 							cout << ex.what() << "\nКод ошибки: " << ex.code() << "\n";
 							system("pause");
-						}
+						}*/
 
 						ofstream out_test_count;
 						out_test_count.exceptions(ofstream::badbit | ofstream::failbit);
@@ -1866,12 +1866,35 @@ inline void Student::NewTest()
 						catch (const ofstream::failure& ex)
 						{
 							gotoxy(25, 4);
-							cout << ex.what() << "\nКод ошибки: " << ex.code() << "\n";
+							cout << ex.what() << "Код ошибки: " << ex.code() << "\n";
 							system("pause");
 						}
 
 						for (size_t i = 1; i < n + 1; i++)
-						{
+						{							
+							try
+							{
+								
+								users_name_test.open(path_users_test);
+								
+								users_name_test << path_users_test << "\n"; //сохраняем путь к файлу для непройденного теста теста
+								users_name_test << path_helper << "\n"; //путь к тесту который проходится
+								users_name_test << path_users_name_test << "\n";
+								users_name_test << it->second << "\n";
+								users_name_test << test_time << "\n";
+								users_name_test << n << "\n"; //сохраняем общее кол-во вопросов
+								users_name_test << test_count << "\n"; //сохраняем пройденное кол-во вопросов
+								users_name_test << ball_count; //сохраняем кол-во правильных ответов
+
+								users_name_test.close();
+							}
+							catch (const ofstream::failure& ex)
+							{
+								gotoxy(25, ++gotx);
+								cout << ex.what() << " Код ошибки: " << ex.code() << "\n";
+								system("pause");
+							}
+							
 							gotoxy(25, ++gotx);
 							cout << "Вопрос № " << i << ".\n";
 
@@ -1900,15 +1923,22 @@ inline void Student::NewTest()
 							try
 							{
 								users_name_test.open(path_users_test);
+								
+								users_name_test << path_users_test << "\n"; //сохраняем путь к файлу для непройденного теста теста
+								users_name_test << path_helper << "\n"; //путь к тесту который проходится
+								users_name_test << path_users_name_test << "\n";
+								users_name_test << it->second << "\n";
+								users_name_test << test_time << "\n";
 								users_name_test << n << "\n"; //сохраняем общее кол-во вопросов
 								users_name_test << test_count << "\n"; //сохраняем пройденное кол-во вопросов
 								users_name_test << ball_count; //сохраняем кол-во правильных ответов
+
 								users_name_test.close();
 							}
 							catch (const ofstream::failure& ex)
 							{
 								gotoxy(25, ++gotx);
-								cout << ex.what() << "\nКод ошибки: " << ex.code() << "\n";
+								cout << ex.what() << " Код ошибки: " << ex.code() << "\n";
 								system("pause");
 							}
 						}
@@ -1959,7 +1989,7 @@ inline void Student::NewTest()
 							try
 							{
 								save_test.open(path_helper, ofstream::app);
-								save_test << "Тест: " << it->second + " Дата и время сдачи: " + test_time + " пройден полностью. Оценка: " << test_grade << " Правильных ответов: " << ball_count << " из " << n << "\n";
+								save_test << "Тест: " << it->second + " \nДата и время сдачи: " + test_time + " пройден полностью. \nОценка: " << test_grade << "\nПравильных ответов: " << ball_count << " из " << n << "\n-----------------------------------------------------------\n";
 								save_test.close();
 							}
 							catch (const ofstream::failure& ex)
@@ -2172,8 +2202,11 @@ inline void Student::ShowUserGrade()
 		if (ckfile)
 		{
 			gotoxy(25, ++gotx);
-			cout << "Вы полностью сдали следующие тесты: ";
+			SetColor(10, Black);
+			cout << "Вы полностью сдали следующие тесты:";
+			SetColor(15, Black);
 			test.open(path);
+			gotx++;
 			while (!test.eof())
 			{
 				mesg = "";
@@ -2200,7 +2233,7 @@ inline void Student::ShowUserGrade()
 		cout << "Ошибка в Student::ShowUserGrade()";
 		
 	}
-
+	gotx++;
 	gotoxy(25, ++gotx);
 	system("pause");
 }
@@ -2288,7 +2321,7 @@ inline void Student::ContinueTest()
 
 					if (it != mp.end())
 					{
-						path = this->GetUsersFolder() + "/" + this->login + "/" + it->second;
+						path = this->GetUsersFolder() + "/" + this->login + "/" + it->second + ".txt ";
 
 						ifs.open(path);
 						bool ckfile = ifs.is_open();
@@ -2299,13 +2332,30 @@ inline void Student::ContinueTest()
 							int ball_count = 0; // подсчет правильных ответов
 							int test_count = 0; // подсчет кол-ва пройденных ответов на выбранный тест
 							int n = 0; //счетчик общего кол-ва вопросов в тесте
-							int test_grade; // итоговая оценка за тест  	
-						
+							string test_path;//путь к файлу непройденного теста
+							string path_helper;//путь к файлу с вопросами теста
+							int test_grade; // итоговая оценка за тест 
+							string path_questions;
+							string answer;//считываем в строку правильный ответ из файла с вопросом
+							string questions;//считываем вопрос
+							string path_users_name_test, it_second, test_time;
+
+							ofstream users_name_test;
+							users_name_test.exceptions(ofstream::badbit | ofstream::failbit);
+
+							//cin.ignore();
 							try
 							{
+								getline(ifs, test_path);
+								getline(ifs, path_helper);
+								getline(ifs, path_users_name_test);
+								getline(ifs, it_second);
+								getline(ifs, test_time);
 								ifs >> n;
 								ifs >> test_count;
 								ifs >> ball_count;
+								//getline(ifs, test_path);
+								
 							}
 							catch (...)
 							{
@@ -2314,27 +2364,49 @@ inline void Student::ContinueTest()
 							
 							ifs.close();
 
-							n -= test_count;
+							//left_count = n - test_count;
 
-							for (size_t i = 1; i < n + 1; i++)
+							for (size_t i = test_count + 1; i < n + 1; i++)
 							{
-								/*gotoxy(25, ++gotx);
+								
+								try
+								{
+									users_name_test.open(test_path);
+									
+									users_name_test << test_path << "\n"; //сохраняем путь к файлу для непройденного теста теста
+									users_name_test << path_helper << "\n"; //путь к тесту который проходится
+									users_name_test << path_users_name_test << "\n";
+									users_name_test << it_second << "\n";
+									users_name_test << test_time << "\n";
+									users_name_test << n << "\n"; //сохраняем общее кол-во вопросов
+									users_name_test << test_count << "\n"; //сохраняем пройденное кол-во вопросов
+									users_name_test << ball_count; //сохраняем кол-во правильных ответов
+
+									users_name_test.close();
+								}
+								catch (const ofstream::failure& ex)
+								{
+									gotoxy(25, ++gotx);
+									cout << ex.what() << " Код ошибки: " << ex.code() << "\n";
+									system("pause");
+								}
+								
+								gotoxy(25, ++gotx);
 								cout << "Вопрос № " << i << ".\n";
 
-								string path_questions = path_helper + "/" + to_string(i) + ".txt";
+								path_questions = path_helper + "/" + to_string(i) + ".txt";
+								ifs.open(path_questions);
 
-								ifn.open(path_questions);
+								getline(ifs, answer);
 
-								getline(ifn, answer);
-
-								while (!ifn.eof())
+								while (!ifs.eof())
 								{
 									questions = "";
-									getline(ifn, questions);
+									getline(ifs, questions);
 									gotoxy(25, ++gotx);
 									cout << questions << "\n";
 								}
-								ifn.close();
+								ifs.close();
 								gotoxy(25, ++gotx);
 								cout << "Вопрос № " << i << ". Введите номер ответа: ";
 								cin >> un;
@@ -2345,17 +2417,82 @@ inline void Student::ContinueTest()
 
 								try
 								{
-									users_name_test.open(path_users_test);
-									users_name_test << test_count << "\n";
-									users_name_test << ball_count;
+									users_name_test.open(test_path);
+									
+									users_name_test << test_path << "\n"; //сохраняем путь к файлу для непройденного теста теста
+									users_name_test << path_helper << "\n"; //путь к тесту который проходится
+									users_name_test << path_users_name_test << "\n";
+									users_name_test << it_second << "\n";
+									users_name_test << test_time << "\n";
+									users_name_test << n << "\n"; //сохраняем общее кол-во вопросов
+									users_name_test << test_count << "\n"; //сохраняем пройденное кол-во вопросов
+									users_name_test << ball_count; //сохраняем кол-во правильных ответов
+
 									users_name_test.close();
 								}
 								catch (const ofstream::failure& ex)
 								{
 									gotoxy(25, ++gotx);
+									cout << ex.what() << "Код ошибки: " << ex.code() << "\n";
+									system("pause");
+								}
+							}
+
+							//Если тест пройден полностью, открываем файл, где записаны все начатые тесты
+						//находим и удаляем тест из списка
+							if (test_count = n)
+							{
+								this->Remove_test(n, path_users_name_test, it_second, test_time);
+
+								test_grade = this->GetGrade(ball_count, n);
+								gotx += 2;
+								gotoxy(25, ++gotx);
+								SetColor(3, Black);
+								cout << "Тест пройден полностью";
+								SetColor(15, Black);
+								gotoxy(25, ++gotx);
+								cout << "Ваша оценка: " << test_grade;
+
+								gotoxy(25, ++gotx);
+								cout << "Правильных ответов: ";
+
+								SetColor(11, Black);
+								cout << ball_count;
+								SetColor(15, Black);
+								cout << " из ";
+								SetColor(1, Black);
+								cout << n;
+								SetColor(15, Black);
+
+								int failtest = n - ball_count;
+
+								int fraction = (n - failtest) / (double)n * 100;
+
+								gotoxy(25, ++gotx);
+								cout << "Процент правильных ответов: ";
+								SetColor(10, Black);
+								cout << fraction << "%";
+								SetColor(15, Black);
+
+								ofstream save_test;
+								save_test.exceptions(ofstream::badbit | ofstream::failbit);
+
+								//файл сохранения пройденых тестов с оценкой
+
+								path_helper = this->GetUsersFolder() + "/" + this->GetLogin() + "/" + "successful_test.txt";
+
+								try
+								{
+									save_test.open(path_helper, ofstream::app);
+									save_test << "Тест: " << it->second + " \nДата и время сдачи: " + test_time + " пройден полностью. \nОценка: " << test_grade << "\nПравильных ответов: " << ball_count << " из " << n << "\n-----------------------------------------------------------\n";
+									save_test.close();
+								}
+								catch (const ofstream::failure& ex)
+								{
+									gotoxy(25, 4);
 									cout << ex.what() << "\nКод ошибки: " << ex.code() << "\n";
 									system("pause");
-								}*/
+								}
 							}
 
 						}
