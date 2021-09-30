@@ -8,6 +8,7 @@
 #include <ctime>
 #include<windows.h>
 #include<vector>
+#include <stdio.h>
 
 #include"MyExceptions.h"
 #include"Menu.h"
@@ -898,12 +899,17 @@ inline void Admin::AddCategories()
 
 		ifs.close();			
 
+		int colortext;
+
 		for (auto it = mp.begin(); it != mp.end(); ++it)
 		{
+			colortext = rand() % 17 - 2;
 			gotoxy(25, ++gotx);
+			SetColor(colortext, Black);
 			cout << it->first << ". " << it->second << "\n";
 		}
-
+		SetColor(15, Black);
+		gotx++;
 		ofstream ofs;
 
 		ofs.open(path , ofstream::app);
@@ -968,12 +974,16 @@ inline void Admin::EditCategories()
 
 		ifs.close();
 
+		int colortext;
+
 		for (auto it = mp.begin(); it != mp.end(); ++it)
 		{
+			colortext = rand() % 17 - 2;			
+			SetColor(colortext, Black);			
 			gotoxy(25, ++gotx);
 			cout << it->first << ". " << it->second << "\n";
 		}
-
+		SetColor(15, Black);
 		cin.ignore();
 		gotoxy(25, ++gotx);
 		cout << "Введите номер раздела для редактирования: ";
@@ -987,8 +997,18 @@ inline void Admin::EditCategories()
 		auto it = mp.find(keyedit);
 
 		if (it != mp.end())
-		{
-			mp[keyedit] = category;
+		{			
+			string s_old = this->GetTestFolder() + "/" + it->second;
+			string s_new = this->GetTestFolder() + "/" + category;
+			
+			mp[keyedit] = category;	
+
+			const char *oldname = s_old.c_str();
+			const char *nename = s_new.c_str();
+
+			//создание новой папки с новым названием, перенос в нее тестов и удаление папки со старым названием
+			rename(oldname, nename);		
+
 		}		
 
 		if (remove(path.c_str()) != 0)
@@ -1032,6 +1052,7 @@ inline void Admin::AddTestsName()
 	string path = this->GetTestFolder() + "/" + this->GetCategoriesFile();
 	string key, category;
 
+	
 	int count = 0; // счетчик кол-ва разделов
 
 	ifstream ifs;
@@ -1046,6 +1067,7 @@ inline void Admin::AddTestsName()
 			cout << "В системе еще нет созданных разделов тестирования";
 			gotoxy(25, ++gotx);
 			cout << "Для создания тестов создайте хотя бы один раздел тестирования";
+			ifs.close();
 		}
 
 		else
@@ -1063,25 +1085,43 @@ inline void Admin::AddTestsName()
 			ifs.close();
 
 			count--;
+			
+			gotoxy(25, ++gotx);
+			cout << "Добавление названия теста в категорию ";
 			gotoxy(25, ++gotx);
 
 			cout << "В системе есть следующие разделы:\n";
 
+			int colortext;
+
 			for (auto it = mp.begin(); it != mp.end(); ++it)
 			{
+				colortext = rand() % 17 - 2;
 				gotoxy(25, ++gotx);
+				SetColor(colortext, Black);
 				cout << it->first << ". " << it->second << "\n";
-			}
+			}			
+		
+			SetColor(15, Black);
 
+			gotx++;
 			cin.ignore();
 			gotoxy(25, ++gotx);
-			cout << "Введите номер категории для добавления теста: ";
+			cout << "Подтвердите номер категории для добавления в него теста: ";
 			string keyedit;
 			getline(cin, keyedit);
 			auto it = mp.find(keyedit);
 
 			if (it != mp.end())
 			{
+				system("cls");
+				gotx = 6;
+
+				gotoxy(25, ++gotx);
+				cout << "Добавление названия теста в категорию ";
+				SetColor(14, Black);
+				cout << it->second;
+				SetColor(15, Black);
 				gotoxy(25, ++gotx);
 				cout << "Введите название теста: ";
 				string testname;
@@ -1122,11 +1162,23 @@ inline void Admin::AddTestsName()
 				ofs << testname << "\n";
 
 				gotoxy(25, ++gotx);
-				cout << "Новый тест добавлен в категорию. \n";
+				cout << "Добавление названия теста в категорию завершено";
 
 				ofs.close();
+				gotoxy(25, ++gotx);
+				system("pause");
+			}
+
+			else
+			{
+				gotoxy(25, ++gotx);
+				cout << "Вы выбрали несуществующую категорию";
+				gotoxy(25, ++gotx);
+				system("pause");
 			}
 		}	
+
+		
 	}
 	catch (...)
 	{
@@ -1138,7 +1190,6 @@ inline void Admin::AddTests()
 {
 	system("cls");
 	int gotx = 6;
-	//unique_ptr<Admin> admin(new Admin);
 	map <string, string> mp;
 	string path = this->GetTestFolder() + "/" + this->GetCategoriesFile();
 	string key, category, folder;
@@ -1155,6 +1206,7 @@ inline void Admin::AddTests()
 		{
 			gotoxy(25, ++gotx);
 			cout << "В системе еще нет созданных разделов тестирования";
+			ifs.close();
 		}
 
 		else
@@ -1171,263 +1223,296 @@ inline void Admin::AddTests()
 			count--;
 			gotoxy(25, ++gotx);
 			cout << "В системе есть следующие разделы:";
-		}
 
-		ifs.close();
-
-
-		for (auto it = mp.begin(); it != mp.end(); ++it)
-		{
-			gotoxy(25, ++gotx);
-			cout << it->first << ". " << it->second << "\n";
-		}
-
-		if (mp.size())
-		{
-			cin.ignore();
-			gotoxy(25, ++gotx);
-			cout << "Введите номер раздела для добавления тестов: ";
-			string keyedit;
-			getline(cin, keyedit);
-
-			auto it = mp.find(keyedit);
-
-			if (it != mp.end())
+			int colortext;
+			for (auto it = mp.begin(); it != mp.end(); ++it)
 			{
-				fs::create_directories(this->GetTestFolder() + "/" + it->second);
 
-				path = this->GetTestFolder() + "/" + it->second + "/" + this->GetTestsName();
+				colortext = rand() % 17 - 2;
+				SetColor(colortext, Black);
+				gotoxy(25, ++gotx);
+				cout << it->first << ". " << it->second << "\n";
+			}
+			SetColor(15, Black);
 
-				ifs.open(path);
+			ifs.close();
 
-				if (!ifs.is_open())
+			if (mp.size())
+			{
+				cin.ignore();
+				gotx++;
+				gotoxy(25, ++gotx);
+				cout << "Введите номер раздела для добавления тестов: ";
+				string keyedit;
+				getline(cin, keyedit);
+
+				auto it = mp.find(keyedit);
+
+				if (it != mp.end())
 				{
-					gotoxy(25, ++gotx);
-					cout << "В этой категории еще нет созданных тестов";
-					gotoxy(25, ++gotx);
-					cout << "Желаете создать тест? (Да(1)/Нет(0): ";
-					int answ;
-					cin >> answ;
+					fs::create_directories(this->GetTestFolder() + "/" + it->second);
 
-					if (answ)
+					path = this->GetTestFolder() + "/" + it->second + "/" + this->GetTestsName();
+
+					ifs.open(path);
+
+					if (!ifs.is_open())
 					{
-						this->AddTestsName();
+						ifs.close();
+						gotx++;
+						gotoxy(25, ++gotx);
+						cout << "В этой категории еще нет созданных названий тестов";
+						gotoxy(25, ++gotx);
+						cout << "Желаете создать название для теста в категории ";
+						SetColor(11, Black);
+						cout << it->second;
+						SetColor(15, Black); 
+						cout << "? ";
+						SetColor(15, Green);
+						cout << "(Да(1)"; 
+						SetColor(15, Black);
+						cout << " / ";
+						
+						SetColor(15, Red);
+						cout << "Нет(0)";
+						SetColor(15, Black);
+						cout << ": ";
+
+						int answ;
+						cin >> answ;
+
+						if (answ)
+						{
+							this->AddTestsName();
+						}
+					}
+
+					else
+					{						
+						map <string, string> map_test;
+
+						system("cls");
+						count = 0;
+						gotx = 6;
+						while (!ifs.eof())
+						{
+							getline(ifs, key);
+							getline(ifs, category);
+
+							if (key != "")
+								map_test[key] = category;
+							count++;
+						}
+						count--;
+
+						ifs.close();
+
+						gotx++;
+						gotoxy(25, ++gotx);
+						cout << "В категории ";
+
+						SetColor(14, Black);
+						cout << mp[keyedit];
+						SetColor(15, Black);
+						cout << " есть следующие тесты: ";
+
+
+						for (auto it = map_test.begin(); it != map_test.end(); ++it)
+						{
+							colortext = rand() % 17 - 2;
+							gotoxy(25, ++gotx);
+							SetColor(colortext, Black); 
+							cout << it->first << ". " << it->second << "\n";
+						}
+						SetColor(15, Black);
+						gotx++;
+						gotoxy(25, ++gotx);
+						cout << "Введите номер Теста для создания к нему вопросов: ";
+						getline(cin, keyedit);
+
+						auto it_test = map_test.find(keyedit);
+
+						if (it_test != map_test.end())
+						{
+							path = this->GetTestFolder() + "/" + it->second + "/" + it_test->second + "/" + "quantity.txt"; // количество вопросов в тесте
+
+							count = 1;
+							int q_key = 0, a_key = 0;
+							string question, answer;
+
+							map<int, string> mquestion;
+							map<int, string> manswer;
+
+							system("cls");
+							gotx = 6;
+							ifs.open(path);
+
+							if (!ifs.is_open())
+							{
+								gotoxy(25, ++gotx);
+								cout << "В системе еще нет тестов в разделе: ";
+								SetColor(14, Black);
+								cout << it->second;
+								SetColor(15, Black);
+								cout << " -> ";
+								SetColor(11, Black);
+								cout << it_test->second;
+								SetColor(15, Black);
+								ifs.close();
+							}
+
+							else
+							{
+								ifs.open(path);
+								while (!ifs.eof())
+								{
+									char* buff = new char[5];
+									ifs.getline(buff, 5);
+									count = atoi(buff);
+									delete[] buff;
+									
+								}
+								ifs.close();
+								gotoxy(25, ++gotx);
+								cout << "В системе есть ";
+								SetColor(3, Black);
+								cout << count;
+								SetColor(15, Black);
+								cout << " вопроса(ов) в разделе ";
+								SetColor(14, Black);
+								cout << it->second;
+								SetColor(15, Black);
+								cout << " -> ";
+								SetColor(11, Black);
+								cout << it_test->second;
+								SetColor(15, Black);
+
+								count++;
+
+								ifstream intest;
+								intest.exceptions(ofstream::badbit | ofstream::failbit);
+								int file_line = -1;
+								string path_helper;
+								string question_test;
+
+								for (size_t i = 1; i < count; i++)
+								{
+
+									path_helper = this->GetTestFolder() + "/" + it->second + "/" + it_test->second + "/" + to_string(i) + ".txt";
+
+									try
+									{
+										intest.open(path_helper);
+
+										for (size_t k = 0; k < 2; k++)
+										{
+											getline(intest, question_test);
+
+											if (!file_line)
+											{
+												gotoxy(25, ++gotx);
+												cout << i << ". " << question_test << "\n";
+												file_line = -2;
+											}
+											file_line++;
+										}
+
+										intest.close();
+
+									}
+									catch (const ifstream::failure& ex)
+									{
+										gotoxy(25, ++gotx);
+										cout << ex.what() << "\nКод ошибки: " << ex.code() << "\n";
+										gotoxy(25, ++gotx);
+										system("pause");
+									}
+
+								}
+
+
+							}
+
+							//ifs.close();
+
+							gotoxy(25, ++gotx);
+							cout << "Добавление теста в раздел: ";
+							SetColor(14, Black);
+							cout << it->second;
+							SetColor(15, Black);
+							cout << " -> ";
+							SetColor(11, Black);
+							cout << it_test->second;
+							SetColor(15, Black);
+
+							gotoxy(25, ++gotx);
+							cout << "Введите вопрос: ";
+							getline(cin, question);
+
+							q_key = count;
+							mquestion.emplace(q_key, question);
+							int n;
+							gotoxy(25, ++gotx);
+							cout << "Введите количество ответов на вопрос: ";
+							cin >> n;
+							gotoxy(25, ++gotx);
+							cout << "Введите ответы на вопрос: ";
+
+							cin.ignore();
+
+							for (size_t i = 1; i < n + 1; i++)
+							{
+								gotoxy(25, ++gotx);
+								cout << i << ". ";
+								getline(cin, answer);
+								//cin.ignore();
+								manswer.emplace(++a_key, answer);
+							}
+
+							gotoxy(25, ++gotx);
+							cout << "Введите номер правильного ответа на вопрос: ";
+							cin >> n;
+
+							ofstream ofs;
+
+							ofs.open(path);
+							ofs << q_key;
+							ofs.close();
+							path = this->GetTestFolder() + "/" + it->second + "/" + it_test->second + "/" + to_string(q_key) + ".txt";
+							ofs.open(path);
+							ofs << n << "\n";
+
+							for (auto it = mquestion.begin(); it != mquestion.end(); ++it)
+							{
+								ofs << it->second << "\n";
+							}
+
+							for (auto it = manswer.begin(); it != manswer.end(); ++it)
+							{
+								ofs << it->first << ". " << it->second << "\n";
+							}
+
+							ofs.close();
+
+							gotoxy(25, ++gotx);
+							cout << "Изменение данных завершено.";
+						}
+
+						else
+						{
+							gotoxy(25, ++gotx);
+							cout << "Вы ввели неверный номер теста";
+						}
 					}
 				}
 
 				else
 				{
-					map <string, string> map_test;
-
-					system("cls");
-					count = 0;
-					gotx = 6;
-					while (!ifs.eof())
-					{
-						getline(ifs, key);
-						getline(ifs, category);
-
-						if (key != "")
-							map_test[key] = category;
-						count++;
-					}
-					count--;				
-
-					ifs.close();
-
-					gotx++;
 					gotoxy(25, ++gotx);
-					cout << "В категории " << mp[keyedit] << " есть следующие тесты: ";
-
-
-					for (auto it = map_test.begin(); it != map_test.end(); ++it)
-					{
-						gotoxy(25, ++gotx);
-						cout << it->first << ". " << it->second << "\n";
-					}
-
-					gotx++;
-					gotoxy(25, ++gotx);
-					cout << "Введите номер Теста для создания к нему вопросов: ";
-					getline(cin, keyedit);
-
-					auto it_test = map_test.find(keyedit);
-
-					if (it_test != map_test.end())
-					{
-						path = this->GetTestFolder() + "/" + it->second + "/" + it_test->second + "/" + "quantity.txt"; // количество вопросов в тесте
-					
-						count = 1;
-						int q_key = 0, a_key = 0;
-						string question, answer;
-
-						map<int, string> mquestion;
-						map<int, string> manswer;
-
-						system("cls");
-						gotx = 6;
-						ifs.open(path);
-
-						if (!ifs.is_open())
-						{
-							gotoxy(25, ++gotx);
-							cout << "В системе еще нет тестов в разделе: ";
-							SetColor(14, Black);
-							cout << it->second;
-							SetColor(15, Black);
-							cout << " -> ";
-							SetColor(11, Black);
-							cout << it_test->second;
-							SetColor(15, Black);
-						}
-
-						else
-						{
-							while (!ifs.eof())
-							{
-								char* buff = new char[5];
-								ifs.getline(buff, 5);
-								count = atoi(buff);
-								delete[] buff;
-							}
-							gotoxy(25, ++gotx);
-							cout << "В системе есть "; 
-							SetColor(3, Black);
-							cout << count;
-							SetColor(15, Black);
-							cout << " вопроса(ов) в разделе ";
-							SetColor(14, Black);
-							cout << it->second;
-							SetColor(15, Black);
-							cout << " -> ";
-							SetColor(11, Black);
-							cout << it_test->second;
-							SetColor(15, Black);
-							
-							count++;
-							
-							ifstream intest;
-							intest.exceptions(ofstream::badbit | ofstream::failbit);
-							int file_line = -1;
-							string path_helper;
-							string question_test;
-
-							for (size_t i = 1; i < count; i++)
-							{		
-								
-								path_helper = this->GetTestFolder() + "/" + it->second + "/" + it_test->second + "/" + to_string(i) + ".txt";
-								
-								try
-								{
-									intest.open(path_helper);
-									
-									for (size_t k = 0; k < 2; k++)
-									{
-										getline(intest, question_test);
-
-										if (!file_line)
-										{
-											gotoxy(25, ++gotx);
-											cout << i << ". " << question_test << "\n";
-											file_line = -2;
-										}
-										file_line++;
-									}
-
-									intest.close();
-									
-								}
-								catch (const ifstream::failure& ex)
-								{
-									gotoxy(25, ++gotx);
-									cout << ex.what() << "\nКод ошибки: " << ex.code() << "\n";
-									gotoxy(25, ++gotx);
-									system("pause");
-								}
-
-							}
-
-							
-						}
-
-						ifs.close();
-
-						gotoxy(25, ++gotx);
-						cout << "Добавление теста в раздел: ";
-						SetColor(14, Black);
-						cout << it->second;
-						SetColor(15, Black);
-						cout << " -> ";
-						SetColor(11, Black);
-						cout << it_test->second;
-						SetColor(15, Black);
-					
-						gotoxy(25, ++gotx);
-						cout << "Введите вопрос: ";
-						getline(cin, question);
-												
-						q_key = count;
-						mquestion.emplace(q_key, question);
-						int n;
-						gotoxy(25, ++gotx);
-						cout << "Введите количество ответов на вопрос: ";
-						cin >> n;
-						gotoxy(25, ++gotx);
-						cout << "Введите ответы на вопрос: ";
-
-						cin.ignore();
-
-						for (size_t i = 1; i < n + 1; i++)
-						{
-							gotoxy(25, ++gotx);
-							cout << i << ". ";
-							getline(cin, answer);
-							//cin.ignore();
-							manswer.emplace(++a_key, answer);
-						}
-
-						gotoxy(25, ++gotx);
-						cout << "Введите номер правильного ответа на вопрос: ";
-						cin >> n;
-
-						ofstream ofs;
-
-						ofs.open(path);
-						ofs << q_key;
-						ofs.close();
-						path = this->GetTestFolder() + "/" + it->second + "/" + it_test->second + "/" + to_string(q_key) + ".txt";
-						ofs.open(path);
-						ofs << n << "\n";
-
-						for (auto it = mquestion.begin(); it != mquestion.end(); ++it)
-						{
-							ofs << it->second << "\n";
-						}
-
-						for (auto it = manswer.begin(); it != manswer.end(); ++it)
-						{
-							ofs << it->first << ". " << it->second << "\n";
-						}
-
-						ofs.close();
-
-						gotoxy(25, ++gotx);
-						cout << "Изменение данных завершено.";
-					}
-
-					else
-					{
-						gotoxy(25, ++gotx);
-						cout << "Вы ввели неверный номер теста";
-					}
+					cout << "Вы ввели неверный номер раздела";
 				}
-			}						
-
-			else
-			{
-				gotoxy(25, ++gotx);
-				cout << "Вы ввели неверный номер раздела";
-			}			
+			}
+						
 		}
 	}
 
@@ -1678,7 +1763,7 @@ inline void Student::NewTest()
 					if (!ifn.is_open())
 					{
 						gotoxy(25, ++gotx);
-						cout << "В системе еще нет созданных разделов тестирования";
+						cout << "Выбранный тест не содержит вопросов";
 					}
 
 					else
@@ -2076,3 +2161,14 @@ const string currentDateTime() {
 	strftime(buf, sizeof(buf), "%Y-%m-%d_%H.%M.%S", &tstruct);
 	return buf;
 }
+
+//void rename(char* dirName)
+//{
+//	char newName[50]; //домустим 50 хватит
+//	cout << "New name: ";
+//	cin >> newName;
+//	if (!MoveFileA(dirName, newName))
+//	{
+//		rename(newName);
+//	}
+//}
