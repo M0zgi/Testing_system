@@ -540,8 +540,11 @@ void StudentFun2() //
 	cout << "Пользователь: " << userName->GetUser() << " (" << userName->GetFIO() << ")";;
 
 	gotoxy(25, 7);
+	unique_ptr<Student> student(new Student);
+	student->SetLogin(userName->GetUser());
+	student->ContinueTest();
 
-	_getch();
+	//_getch();
 	system("cls");
 }
 
@@ -559,9 +562,9 @@ void StudentFun3() //
 	student->SetLogin(userName->GetUser());
 	student->ShowUserGrade();
 
-	gotoxy(25, 7);
+	//gotoxy(25, 7);
 
-	_getch();
+	//_getch();
 	system("cls");
 }
 

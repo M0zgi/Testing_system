@@ -142,6 +142,7 @@ public:
 	void ShowUserGrade() override;
 
 	void NewTest(); // запуск нового тестирования
+	void ContinueTest(); // продолжить незавершенный тест тестирования
 
 private:
 	string filename;
@@ -1690,14 +1691,18 @@ inline void Student::NewTest()
 
 		ifs.close();
 
+		int colortext;
 
 		for (auto it = mp.begin(); it != mp.end(); ++it)
 		{
+			colortext = rand() % 17 - 2;
+			SetColor(colortext, Black);
 			gotoxy(25, ++gotx);
 			cout << it->first << ". " << it->second << "\n";
 		}
 
-		
+		SetColor(15, Black);
+		gotx++;
 		gotoxy(25, ++gotx);
 		cout << "Введите номер категории для выбора теста: ";
 		string keyedit;
@@ -1717,7 +1722,7 @@ inline void Student::NewTest()
 			
 			count = 1;
 
-			string category_name = it->second; //сохраняем текущее название категорииж
+			string category_name = it->second; //сохраняем текущее название категории
 
 			mp.clear(); //очищаем map с категориями разделов, и заполняем его названиями существующих тестов
 
@@ -1727,6 +1732,18 @@ inline void Student::NewTest()
 
 			if (ckfile)
 			{
+				system("cls");
+				gotx = 6;
+				gotoxy(25, ++gotx);
+				cout << "Вы выбрали категорию ";
+				SetColor(14, Black); 
+				cout << category_name;
+				SetColor(15, Black);
+
+				gotx++;
+				gotoxy(25, ++gotx);
+				cout << "Категория содержит следующие тесты: ";
+
 				while (!ifs.eof())
 				{
 					getline(ifs, key);
@@ -1739,13 +1756,15 @@ inline void Student::NewTest()
 				count--;
 
 				for (auto it = mp.begin(); it != mp.end(); ++it)
-				{
+				{					
+					colortext = rand() % 17 - 2;
+					SetColor(colortext, Black);
 					gotoxy(25, ++gotx);
 					cout << it->first << ". " << it->second << "\n";
 				}
-
+				SetColor(15, Black);
 				gotoxy(25, ++gotx);
-				cout << "Введите номер теста: ";
+				cout << "Введите номер теста для прохождения: ";
 				keyedit;
 				getline(cin, keyedit);
 
@@ -1794,6 +1813,11 @@ inline void Student::NewTest()
 						cout << n;
 						SetColor(15, Black);
 						cout << " вопроса(ов)";
+						
+						gotx++;
+						gotoxy(25, ++gotx);
+						cout << "Вы можете в любое время прервать тестирование и продолжить прохождение в удобное для вас время";
+
 						gotx+=2;
 
 						ifn.close();
@@ -1876,7 +1900,9 @@ inline void Student::NewTest()
 							try
 							{
 								users_name_test.open(path_users_test);
-								users_name_test << test_count;
+								users_name_test << n << "\n"; //сохраняем общее кол-во вопросов
+								users_name_test << test_count << "\n"; //сохраняем пройденное кол-во вопросов
+								users_name_test << ball_count; //сохраняем кол-во правильных ответов
 								users_name_test.close();
 							}
 							catch (const ofstream::failure& ex)
@@ -1912,6 +1938,17 @@ inline void Student::NewTest()
 							SetColor(1, Black);
 							cout << n;
 							SetColor(15, Black);
+
+							int failtest = n - ball_count;
+
+							int fraction = (n - failtest) / (double)n * 100;
+
+							gotoxy(25, ++gotx);
+							cout << "Процент правильных ответов: ";
+                            SetColor(10, Black);
+							cout << fraction << "%";
+							SetColor(15, Black);
+						
 							ofstream save_test;
 							save_test.exceptions(ofstream::badbit | ofstream::failbit);
 
@@ -1932,9 +1969,15 @@ inline void Student::NewTest()
 								system("pause");
 							}
 						}
-
 					}
 				}
+
+				else
+				{
+					gotoxy(25, ++gotx);
+					cout << "Указан неверный номер теста";
+				}
+
 				ifs.close();
 			}						
 			
@@ -2011,12 +2054,16 @@ inline void User::Remove_test(int n, string path_users_name_test, string second,
 	{
 		gotoxy(25, 4);
 		cout << ex.what() << "\n";
+		gotoxy(25, 5);
+		system("pause");
 	}
 
 	catch (...)
 	{
 		gotoxy(25, 2);
 		cout << "Ошибка в User::Remove_test()";
+		gotoxy(25, 3);
+		system("pause");
 	}
 }
 
@@ -2143,6 +2190,7 @@ inline void Student::ShowUserGrade()
 		{
 			gotoxy(25, ++gotx);
 			cout << "У вас нет полностью завершенных тестов. ";
+			
 		}			
 	}
 
@@ -2150,7 +2198,200 @@ inline void Student::ShowUserGrade()
 	{
 		gotoxy(25, ++gotx);
 		cout << "Ошибка в Student::ShowUserGrade()";
+		
 	}
+
+	gotoxy(25, ++gotx);
+	system("pause");
+}
+
+inline void Student::ContinueTest()
+{
+	system("cls");	
+	int gotx = 6;
+	map <int, string> mp;
+	string path = this->GetUsersFolder() + "/" + this->login+ "/" + "student_name_tests.txt";
+	//string key, category, folder;
+
+	string name_test;
+	int count = -1; // счетчик кол-ва непройденных до конца тестов
+
+	ifstream ifs(path);
+
+	try
+	{
+		//проверяем есть ли пользовательский файл с не завершеными тестами
+		bool ckfile = ifs.is_open();
+		ifs.close();
+
+		if (ckfile)
+		{
+			int i = 0;
+			ifs.open(path);
+			while (!ifs.eof())
+			{				
+				name_test = "";
+				getline(ifs, name_test);
+				gotoxy(25, ++gotx);
+
+				if (name_test != "")
+					mp[++i] = name_test;
+
+				count++;
+			}
+
+			ifs.close();
+
+			if (!count)
+			{
+				gotoxy(25, ++gotx);
+				cout << "У вас нет незавершенных тестов";
+			}
+
+			else
+			{
+				gotoxy(25, ++gotx);
+				cout << "У вас есть незавершенные тесты в кол-ве: " << count << "\n";
+				int colortext;
+
+				for (auto it = mp.begin(); it != mp.end(); ++it)
+				{
+					colortext = rand() % 17 - 2;
+					
+					SetColor(colortext, Black);
+					gotoxy(25, ++gotx);
+					cout << it->first << ". " << it->second << "\n";
+				}
+				SetColor(15, Black);
+
+				gotx++;
+				gotoxy(25, ++gotx);
+				cout << "Желаете проложить тестирование? ";
+				SetColor(15, Green);
+				cout << "(Да(1)";
+				SetColor(15, Black);
+				cout << " / ";
+				SetColor(15, Red);
+				cout << "Нет(0)";
+				SetColor(15, Black);
+				cout << ": ";
+				int keyedit;
+				cin >> keyedit;
+
+				if (keyedit)
+				{
+					gotx++;
+					gotoxy(25, ++gotx);
+					cout << "Введите номер теста для продолжения: ";
+					cin >> keyedit;
+					auto it = mp.find(keyedit);
+
+					if (it != mp.end())
+					{
+						path = this->GetUsersFolder() + "/" + this->login + "/" + it->second;
+
+						ifs.open(path);
+						bool ckfile = ifs.is_open();
+
+						if (ckfile)
+						{
+							int un; // номер ответа на вопрос теста введенного пользователем
+							int ball_count = 0; // подсчет правильных ответов
+							int test_count = 0; // подсчет кол-ва пройденных ответов на выбранный тест
+							int n = 0; //счетчик общего кол-ва вопросов в тесте
+							int test_grade; // итоговая оценка за тест  	
+						
+							try
+							{
+								ifs >> n;
+								ifs >> test_count;
+								ifs >> ball_count;
+							}
+							catch (...)
+							{
+								cout << "Не удалось считать данные из файла незавершенного теста Student::ContinueTest()";
+							}
+							
+							ifs.close();
+
+							n -= test_count;
+
+							for (size_t i = 1; i < n + 1; i++)
+							{
+								/*gotoxy(25, ++gotx);
+								cout << "Вопрос № " << i << ".\n";
+
+								string path_questions = path_helper + "/" + to_string(i) + ".txt";
+
+								ifn.open(path_questions);
+
+								getline(ifn, answer);
+
+								while (!ifn.eof())
+								{
+									questions = "";
+									getline(ifn, questions);
+									gotoxy(25, ++gotx);
+									cout << questions << "\n";
+								}
+								ifn.close();
+								gotoxy(25, ++gotx);
+								cout << "Вопрос № " << i << ". Введите номер ответа: ";
+								cin >> un;
+								gotx++;
+								if (to_string(un) == answer)
+									ball_count++;
+								test_count++;
+
+								try
+								{
+									users_name_test.open(path_users_test);
+									users_name_test << test_count << "\n";
+									users_name_test << ball_count;
+									users_name_test.close();
+								}
+								catch (const ofstream::failure& ex)
+								{
+									gotoxy(25, ++gotx);
+									cout << ex.what() << "\nКод ошибки: " << ex.code() << "\n";
+									system("pause");
+								}*/
+							}
+
+						}
+
+						else
+						{
+							cout << "Не удалось открыть тест.";
+						}
+						ifs.close();
+
+					}
+				}
+
+				else
+				{
+					gotoxy(25, ++gotx);
+					cout << "Вы всегда можете вернутся в этот раздел и завершить тестирвоание.";
+				}
+				
+			}
+		}
+
+		else
+		{
+			gotoxy(25, ++gotx);
+			cout << "Вы еще не сдавали тестов";
+		}
+	}
+	catch (...)
+	{
+		gotoxy(25, ++gotx);
+		cout << "Ошибка в Student::ContinueTest()";
+	}
+
+	gotoxy(25, ++gotx);
+	system("pause");
 }
 
 const string currentDateTime() {
@@ -2161,14 +2402,3 @@ const string currentDateTime() {
 	strftime(buf, sizeof(buf), "%Y-%m-%d_%H.%M.%S", &tstruct);
 	return buf;
 }
-
-//void rename(char* dirName)
-//{
-//	char newName[50]; //домустим 50 хватит
-//	cout << "New name: ";
-//	cin >> newName;
-//	if (!MoveFileA(dirName, newName))
-//	{
-//		rename(newName);
-//	}
-//}
