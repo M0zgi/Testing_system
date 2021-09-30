@@ -65,7 +65,7 @@ public:
 	User(string login, string pass) : login(login), pass(pass) {}
 	
 	virtual void Registration() = 0;
-	virtual void ShowUserGrade() = 0;
+	virtual void ShowUserGrade(string userName) = 0;
 	
 	void SetLogin(string login) { this->login = login; }
 
@@ -119,10 +119,12 @@ public:
 	void AddTestsName();//добавление названий тестов
 	void AddTests();//добавление тестов
 
+	//void ShowUserTests();
+
 	friend bool CheckAdmin();
 
 	void Registration() override;
-	void ShowUserGrade() override {};
+	void ShowUserGrade(string userName) override;
 	
 private:	
 	static string filename;
@@ -139,7 +141,7 @@ public:
 	string GetStudentName() { return this->name; }
 
 	void Registration() override;
-	void ShowUserGrade() override;
+	void ShowUserGrade(string userName) override;
 
 	void NewTest(); // запуск нового тестирования
 	void ContinueTest(); // продолжить незавершенный тест тестирования
@@ -598,7 +600,7 @@ inline void Admin::PrintStudents()
 	string path = this->GetUsersFolder() + "/" + this->GetStudentsFile();
 	string key, data;
 	ifstream ifs;
-	int gotx = 10;
+	int gotx = 13;
 
 	ifs.open(path);
 
@@ -1510,6 +1512,88 @@ inline void Admin::AddTests()
 
 }
 
+inline void Admin::ShowUserGrade(string userName)
+{
+	map <string, string> mp_users;
+	map <string, string> mp;
+	string path = this->GetUsersFolder() + "/" + this->GetStudentsFile();
+
+	//папка для хранения личных данных в одном файле по каждому пользоввателю
+	//string path2 = this->GetUsersFolder() + "/" + this->GetUsersInfo();
+
+	string key, data, login;
+	ifstream ifs;
+	int gotx = 6;
+	system("cls");
+	gotoxy(25, ++gotx);
+	cout << "Просмотр статистики полностью пройденных тестов по студентам";
+	try
+	{
+		ifs.open(path);
+
+		if (!ifs.is_open())
+		{
+			gotoxy(25, ++gotx);
+			cout << "Admin::ShowUserGrade(string userName) path";
+		}
+
+		while (!ifs.eof())
+		{
+			key = "";
+			data = "";
+			getline(ifs, key);
+			if (key != "")
+				getline(ifs, data);
+
+			if (key != "")
+				mp[key] = data;
+		}
+		ifs.close();
+
+		this->PrintStudents();
+
+		//gotoxy(25, ++gotx);
+	//	cout << "Просмотра статистики сданных тестов у студента";
+		gotoxy(25, ++gotx); 
+		cout << "Введите мобильний номер телефона студента: ";
+		cin >> key;		
+		auto it = mp.find(key);
+
+		if (it != mp.end())
+		{			
+			system("cls");
+			gotx = 6;
+			gotoxy(25, ++gotx);
+			cout << "Студент найден в базе: " << it->second;
+			gotoxy(25, ++gotx);
+			cout << "Введите логин для подтверждения получения данных: ";
+			cin >> login;
+			
+			unique_ptr<Student> student(new Student);
+			student->SetLogin(login);
+
+			student->ShowUserGrade(it->second);
+		}
+
+		else
+		{
+			system("cls");
+			gotoxy(25, 7);
+			cout << "По указанному номеру телефона студент не найден";
+			gotoxy(25, 8);
+			system("pause");
+		}
+	}
+	catch (...)
+	{
+		system("cls");
+		gotoxy(25, 7);
+		cout << "Catch Admin::ShowUserGrade(string userName)";
+		gotoxy(25, 8);
+		system("pause");
+	}
+}
+
 void Student::Registration()
 {	
 	system("cls");
@@ -2155,7 +2239,7 @@ inline int User::GetGrade(int ball_count, int n)
 	}
 }
 
-inline void Student::ShowUserGrade()
+inline void Student::ShowUserGrade(string userName)
 {
 	int gotx = 6;
 	string path = this->GetUsersFolder() + "/" + this->GetLogin() + "/" + "successful_test.txt";
@@ -2174,7 +2258,7 @@ inline void Student::ShowUserGrade()
 		{
 			gotoxy(25, ++gotx);
 			SetColor(10, Black);
-			cout << "Вы полностью сдали следующие тесты:";
+			cout << "Студент " << userName << " полностью сдал следующие тесты:";
 			SetColor(15, Black);
 			test.open(path);
 			gotx++;
@@ -2193,7 +2277,7 @@ inline void Student::ShowUserGrade()
 		else
 		{
 			gotoxy(25, ++gotx);
-			cout << "У вас нет полностью завершенных тестов. ";			
+			cout << "У текущего студента нет полностью завершенных тестов. ";			
 		}			
 	}
 

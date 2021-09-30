@@ -349,7 +349,13 @@ void AdminFun1()
 //-----------------------------------------------------------------------------------------------
 void AdminFun2()
 {
-	
+	system("cls");
+	gotoxy(0, 0);
+	cout << "Пользователь: " << userName->GetUser() << " (" << userName->GetFIO() << ")";
+
+	unique_ptr<Admin> admin(new Admin);
+	admin->ShowUserGrade(userName->GetFIO());
+	system("cls");
 }
 //-----------------------------------------------------------------------------------------------
 void AdminFun3()
@@ -560,7 +566,7 @@ void StudentFun3() //
 
 	unique_ptr<Student> student(new Student);
 	student->SetLogin(userName->GetUser());
-	student->ShowUserGrade();
+	student->ShowUserGrade(userName->GetFIO());
 
 	//gotoxy(25, 7);
 
