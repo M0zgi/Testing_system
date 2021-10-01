@@ -386,7 +386,7 @@ void AdminFun3()
 		cout << "Укажите пункт меню: ";
 		
 		cin >> key;
-
+	
 		switch (key) // проверка введенного ключа.
 		{
 		case '1': // Создание разделов			
@@ -399,7 +399,9 @@ void AdminFun3()
 		case '2': // Редактирование разделов	
 		{
 			unique_ptr<Admin> ad(new Admin);
+			
 			ad->EditCategories();
+			
 			break;
 		}
 
