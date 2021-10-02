@@ -967,7 +967,8 @@ inline void Admin::AddCategories()
 		}
 
 		else
-		{
+		{		
+		
 			while (!ifs.eof())
 			{
 				getline(ifs, key);
@@ -979,40 +980,44 @@ inline void Admin::AddCategories()
 			}
 			count--;
 			ifs.close();
+		}
+			//cin.ignore();
 
-			if (mp.size())
+		if (mp.size())
+		{
+			gotoxy(25, ++gotx);
+			cout << "В системе есть следующие разделы: ";
+
+			int colortext;
+
+			for (auto it = mp.begin(); it != mp.end(); ++it)
 			{
+				colortext = rand() % 17 - 2;
 				gotoxy(25, ++gotx);
-				cout << "В системе есть следующие разделы: ";			
-
-				int colortext;
-
-				for (auto it = mp.begin(); it != mp.end(); ++it)
-				{
-					colortext = rand() % 17 - 2;
-					gotoxy(25, ++gotx);
-					SetColor(colortext, Black);
-					cout << it->first << ". " << it->second << "\n";
-				}
-				SetColor(15, Black);
-				gotx++;
+				SetColor(colortext, Black);
+				cout << it->first << ". " << it->second << "\n";
 			}
-			
-				ofstream ofs;
+			SetColor(15, Black);
+			gotx++;
+		}
 
-				ofs.open(path, ofstream::app);
-				cin.ignore();
-				gotoxy(25, ++gotx);
-				cout << "Введите название нового раздела: ";
-				getline(cin, category);
-				ofs << ++count << "\n";
-				ofs << category << "\n";
-				gotoxy(25, ++gotx);
-				cout << "Изменение данных завершено. \n";
+	
+			ofstream ofs;
 
-				ofs.close();
+			ofs.open(path, ofstream::app);
+			cin.ignore();
+			gotoxy(25, ++gotx);
+			cout << "Введите название нового раздела: ";
+			getline(cin, category);
+			ofs << ++count << "\n";
+			ofs << category << "\n";
+			gotoxy(25, ++gotx);
+			cout << "Изменение данных завершено. \n";
+
+			ofs.close();
+		
 			
-		}			
+					
 	}
 
 	catch (...)
@@ -1477,13 +1482,16 @@ inline void Admin::AddTests()
 
 							else
 							{
+								ifs.close();
+
 								ifs.open(path);
 								while (!ifs.eof())
 								{
 									char* buff = new char[5];
 									ifs.getline(buff, 5);
 									count = atoi(buff);
-									delete[] buff;									
+									delete[] buff;	
+
 								}
 
 								ifs.close();

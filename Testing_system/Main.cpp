@@ -25,6 +25,8 @@ int main()
 	
 	//srand(time(0));
 
+	
+
 	if (!CheckAdmin())
 	{		
 		unique_ptr<Admin> admin(new Admin);		 
