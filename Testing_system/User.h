@@ -963,6 +963,7 @@ inline void Admin::AddCategories()
 			cout << "В системе еще нет созданных разделов тестирвоания\n";
 			gotoxy(25, ++gotx);
 			system("pause");
+			ifs.close();
 		}
 
 		else
@@ -977,12 +978,12 @@ inline void Admin::AddCategories()
 				count++;
 			}
 			count--;
+			ifs.close();
 
 			if (mp.size())
 			{
 				gotoxy(25, ++gotx);
-				cout << "В системе есть следующие разделы: ";
-				ifs.close();
+				cout << "В системе есть следующие разделы: ";			
 
 				int colortext;
 
@@ -996,9 +997,7 @@ inline void Admin::AddCategories()
 				SetColor(15, Black);
 				gotx++;
 			}
-
-			else
-			{
+			
 				ofstream ofs;
 
 				ofs.open(path, ofstream::app);
@@ -1012,7 +1011,7 @@ inline void Admin::AddCategories()
 				cout << "Изменение данных завершено. \n";
 
 				ofs.close();
-			}
+			
 		}			
 	}
 
@@ -1043,8 +1042,7 @@ inline void Admin::EditCategories()
 		{
 			gotoxy(25, ++gotx);
 			cout << "В системе еще нет созданных разделов тестирования";
-			gotoxy(25, ++gotx);
-			system("pause");
+			
 		}
 
 		else
@@ -1301,6 +1299,9 @@ inline void Admin::AddTestsName()
 	{
 		cout << "Ошибка в Admin::AddCategories()";
 	}
+
+	gotoxy(25, ++gotx);
+	system("pause");
 }
 
 inline void Admin::AddTests()
@@ -1324,8 +1325,7 @@ inline void Admin::AddTests()
 			gotoxy(25, ++gotx);
 			cout << "В системе еще нет созданных разделов тестирования";
 			ifs.close();
-			gotoxy(25, ++gotx);
-			system("pause");
+		
 		}
 
 		else
