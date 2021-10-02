@@ -1324,8 +1324,7 @@ inline void Admin::AddTests()
 		{
 			gotoxy(25, ++gotx);
 			cout << "В системе еще нет созданных разделов тестирования";
-			ifs.close();
-		
+			ifs.close();		
 		}
 
 		else
@@ -1339,9 +1338,7 @@ inline void Admin::AddTests()
 					mp[key] = category;
 				count++;
 			}
-			count--;		
-
-			
+			count--;					
 
 			ifs.close();
 
